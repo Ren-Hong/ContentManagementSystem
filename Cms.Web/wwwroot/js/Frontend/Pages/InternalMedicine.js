@@ -1,4 +1,4 @@
-import { getContentTypeOptions } from '../api/contentTypeApi.js';
+import { getContentTypeLookups } from '../api/contentTypeApi.js';
 import { ContentTypeCreateModal } from './ContentTypeCreateModal.js';
 import { ContentTypeDeleteModal } from './ContentTypeDeleteModal.js';
 import { ContentTypeEditModal } from './ContentTypeEditModal.js';
@@ -32,7 +32,7 @@ export const InternalMedicine = {
 
     mounted() {
         if (this.departmentId) {
-            this.loadContentTypeOptions();
+            this.loadContentTypes();
         }
     },
 
@@ -41,22 +41,22 @@ export const InternalMedicine = {
             immediate: false,
             handler(newVal) {
                 if (newVal) {
-                    this.loadContentTypeOptions();
+                    this.loadContentTypes();
                 }
             }
         }
     },
 
     methods: {
-        async loadContentTypeOptions(selectedTypeId = null) {
+        async loadContentTypes(selectedTypeId = null) {
             this.loading = true;
 
             try {
-                const res = await getContentTypeOptions({
+                const response = await getContentTypeLookups({
                     departmentId: this.departmentId
                 });
 
-                this.contentTypes = res.data || [];
+                this.contentTypes = response.data || [];
 
                 const targetTypeId = selectedTypeId || this.currentType?.typeId;
                 const matchedType = targetTypeId
@@ -83,7 +83,7 @@ export const InternalMedicine = {
 
         async handleCreated(createdType) {
             this.showCreateModal = false;
-            await this.loadContentTypeOptions(createdType?.typeId || null);
+            await this.loadContentTypes(createdType?.typeId || null);
         },
 
         openEditModal() {
@@ -97,7 +97,7 @@ export const InternalMedicine = {
 
         async handleUpdated(updatedType) {
             this.showEditModal = false;
-            await this.loadContentTypeOptions(updatedType?.typeId || this.currentType?.typeId || null);
+            await this.loadContentTypes(updatedType?.typeId || this.currentType?.typeId || null);
         },
 
         openDeleteModal() {
@@ -118,7 +118,7 @@ export const InternalMedicine = {
                 this.currentType = null;
             }
 
-            await this.loadContentTypeOptions();
+            await this.loadContentTypes();
         }
     },
 

@@ -95,7 +95,7 @@ export const ContentTypeCreateModal = {
             this.submitting = true;
 
             try {
-                const res = await createContentType({
+                const response = await createContentType({
                     departmentId: this.departmentId,
                     typeName: this.form.typeName.trim(),
                     fields: this.form.fields.map(x => ({
@@ -105,12 +105,12 @@ export const ContentTypeCreateModal = {
                     }))
                 });
 
-                if (!res.success) {
-                    alert(res.errorCode || '建立表單種類失敗');
+                if (!response.success) {
+                    alert(response.errorCode || '建立表單種類失敗');
                     return;
                 }
 
-                this.$emit('created', res.data);
+                this.$emit('created', response.data);
                 this.modal.hide();
             } catch (err) {
                 console.error(err);

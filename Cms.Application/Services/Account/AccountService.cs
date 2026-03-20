@@ -105,13 +105,13 @@ namespace Cms.Application.Services.Account
             };
         }
 
-        public async Task<PagedResult<GetAccountSummariesResponseDto>> GetAccountSummariesAsync(PageRequest preq)
+        public async Task<PagedResult<AccountListResponseDto>> ListAccountsAsync(PageRequest pageRequest)
         {
-            var pagedRows = await _accountRepository.GetAccountSummariesPagedAsync(preq);
+            var pagedRows = await _accountRepository.ListAccountRoleAssignmentRowsAsync(pageRequest);
 
             var grouped = pagedRows.Items
                 .GroupBy(x => new { x.AccountId, x.Username, x.Status })
-                .Select(g => new GetAccountSummariesResponseDto
+                .Select(g => new AccountListResponseDto
                 {
                     AccountId = g.Key.AccountId,
                     Username  = g.Key.Username,
@@ -128,7 +128,7 @@ namespace Cms.Application.Services.Account
                             Departments = roleGroup
                                 .Where(r => r.DepartmentId.HasValue && r.DepartmentName != null)
                                 .GroupBy(r => new { DeptId = r.DepartmentId!.Value, DeptName = r.DepartmentName! })
-                                .Select(dg => new GetDepartmentOptionsResponseDto
+                                .Select(dg => new DepartmentLookupDto
                                 {
                                     DepartmentId = dg.Key.DeptId,
                                     DepartmentName = dg.Key.DeptName
@@ -139,7 +139,7 @@ namespace Cms.Application.Services.Account
                 })
                 .ToList();
 
-            return new PagedResult<GetAccountSummariesResponseDto>
+            return new PagedResult<AccountListResponseDto>
             {
                 Page = pagedRows.Page,
                 PageSize = pagedRows.PageSize,
@@ -327,7 +327,7 @@ namespace Cms.Application.Services.Account
             try
             {
                 // 更新帳戶狀態
-                var accountId = await _accountRepository.UpdateStatusAsync(
+                var accountId = await _accountRepository.UpdateAccountStatusAsync(
                     dto.Username,
                     dto.Status
                 );

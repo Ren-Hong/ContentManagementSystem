@@ -33,7 +33,7 @@ namespace Cms.Infrastructure.Repositories.Permission
             return count == permissionIds.Count;
         }
 
-        public async Task<IEnumerable<PermissionOptionEntity>> GetPermissionOptionsAsync()
+        public async Task<IEnumerable<PermissionLookupEntity>> ListPermissionLookupsAsync()
         {
             const string sql = @"
                 SELECT
@@ -44,7 +44,7 @@ namespace Cms.Infrastructure.Repositories.Permission
                 ORDER BY PermissionName
             ";
 
-            return await _db.QueryAsync<PermissionOptionEntity>(
+            return await _db.QueryAsync<PermissionLookupEntity>(
                 sql,
                 transaction: Tx
             );

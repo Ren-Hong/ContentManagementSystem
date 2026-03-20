@@ -20,17 +20,17 @@ namespace Cms.Web.Controllers.Department
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetDepartmentOptions()
+        public async Task<IActionResult> ListDepartmentLookups()
         {
-            var rdto = await _departmentService.GetDepartmentOptionsAsync();
+            var rdto = await _departmentService.ListDepartmentLookupsAsync();
 
-            var res = rdto.Select(x => new GetDepartmentOptionsResponseModel
+            var res = rdto.Select(x => new DepartmentLookupResponseModel
             {
                 DepartmentName = x.DepartmentName,
                 DepartmentId = x.DepartmentId,
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetDepartmentOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<DepartmentLookupResponseModel>>
             {
                 Success = true,
                 Data = res
@@ -39,18 +39,18 @@ namespace Cms.Web.Controllers.Department
 
         [HttpGet("sidebar")]
         [Authorize(Policy = "Permission.Content.View")]
-        public async Task<IActionResult> GetDepartmentsForSidebar()
+        public async Task<IActionResult> ListAccessibleDepartments()
         {
-            var rdto = await _departmentService.GetDepartmentsForSidebarAsync(GetCurrentAccountId());
+            var rdto = await _departmentService.ListAccessibleDepartmentsAsync(GetCurrentAccountId());
 
-            var res = rdto.Select(x => new GetDepartmentsForSidebarResponseModel
+            var res = rdto.Select(x => new AccessibleDepartmentResponseModel
             {
                 DepartmentId = x.DepartmentId,
                 DepartmentName = x.DepartmentName,
                 DepartmentCode = x.DepartmentCode,
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetDepartmentsForSidebarResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<AccessibleDepartmentResponseModel>>
             {
                 Success = true,
                 Data = res

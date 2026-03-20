@@ -20,12 +20,12 @@ namespace Cms.Application.Services.Scope
             _scopeRepository = scopeRepository;
         }
 
-        public async Task<List<GetScopeOptionsResponseDto>> GetScopeOptionsAsync()
+        public async Task<List<ScopeLookupDto>> ListScopeLookupsAsync()
         {
-            var rows = await _scopeRepository.GetScopeOptionsAsync();
+            var rows = await _scopeRepository.ListScopeLookupsAsync();
 
             return rows
-                .Select(x => new GetScopeOptionsResponseDto
+                .Select(x => new ScopeLookupDto
                 {
                     ScopeId = x.ScopeId,
                     ScopeCode = x.ScopeCode,

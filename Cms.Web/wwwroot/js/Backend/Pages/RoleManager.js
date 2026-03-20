@@ -1,4 +1,4 @@
-﻿import { getRoleSummaries } from '../api/roleApi.js';
+﻿import { getRoles } from '../api/roleApi.js';
 import { RoleStatusText } from '../constants/roleStatus.js';
 
 import { RoleCreateModal } from './RoleCreateModal.js';
@@ -16,7 +16,7 @@ export const RoleManager = {
         return {
             RoleStatusText,
 
-            roleSummaries: [],
+            roles: [],
 
             page: 1,
             pageSize: 10,
@@ -33,25 +33,30 @@ export const RoleManager = {
     },
 
     mounted() {
-        this.loadRoleSummaries();
+        this.loadRoles();
     },
 
     methods: {
-        async loadRoleSummaries() {
+        async loadRoles() {
             this.loading = true;
             try {
-                const res = await getRoleSummaries({
+                const response = await getRoles({
                     page: this.page,
                     pageSize: this.pageSize,
                     keyword: document.getElementById('roleSearch')?.value
                 });
 
-                this.roleSummaries = res.data.items;
-                this.totalCount = res.data.totalCount;
+                this.roles = response.data.items;
+                this.totalCount = response.data.totalCount;
 
             } finally {
                 this.loading = false;
             }
+        },
+
+        searchRoles() {
+            this.page = 1;
+            this.loadRoles();
         },
 
         changePage(p) {
@@ -61,20 +66,20 @@ export const RoleManager = {
             if (p > maxPage) return;
 
             this.page = p;
-            this.loadRoleSummaries();
+            this.loadRoles();
         },
 
         openCreate() {
             this.showCreate = true;
         },
 
-        openEdit(roleSummary) {
-            this.selectedRole = roleSummary;
+        openEdit(role) {
+            this.selectedRole = role;
             this.showEdit = true;
         },
 
-        openDelete(roleSummary) {
-            this.selectedRole = roleSummary;
+        openDelete(role) {
+            this.selectedRole = role;
             this.showDelete = true;
         },
 
@@ -85,7 +90,7 @@ export const RoleManager = {
 
             this.selectedRole = null;
 
-            await this.loadRoleSummaries();
+            await this.loadRoles();
         }
     },
 
@@ -104,7 +109,7 @@ export const RoleManager = {
 
                     <button
                         class="btn btn-outline-secondary"
-                        @click="loadRoleSummaries">
+                        @click="searchRoles">
                         🔍 搜尋
                     </button>
                 </div>
@@ -125,7 +130,7 @@ export const RoleManager = {
                 </thead>
 
                 <tbody>
-                    <tr v-for="r in roleSummaries" :key="r.roleId">
+                    <tr v-for="r in roles" :key="r.roleId">
 
                         <td>{{ r.roleName }}</td>
 

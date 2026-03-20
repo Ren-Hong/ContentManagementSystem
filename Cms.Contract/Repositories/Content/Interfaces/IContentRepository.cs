@@ -20,7 +20,7 @@ namespace Cms.Contract.Repositories.Content.Interfaces
 
         Task<List<ContentTypeFieldDefinitionEntity>> GetFieldDefinitionsByTypeIdAsync(Guid typeId);
 
-        Task<List<ContentEntity>> GetContentsAsync(Guid typeId);
+        Task<List<ContentEntity>> ListContentsAsync(Guid typeId);
 
         Task<Guid> CreateContentAsync(Guid typeId, Guid ownerId, string status);
 

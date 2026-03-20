@@ -18,7 +18,7 @@ namespace Cms.Infrastructure.Repositories.Scope
         {
         }
 
-        public async Task<IEnumerable<ScopeOptionEntity>> GetScopeOptionsAsync(bool includeAssigned = false)
+        public async Task<IEnumerable<ScopeLookupEntity>> ListScopeLookupsAsync(bool includeAssigned = false)
         {
             const string sql = @"
                 SELECT
@@ -30,7 +30,7 @@ namespace Cms.Infrastructure.Repositories.Scope
                 ORDER BY ScopeName
             ";
 
-            return await _db.QueryAsync<ScopeOptionEntity>(
+            return await _db.QueryAsync<ScopeLookupEntity>(
                 sql,
                 new { IncludeAssigned = includeAssigned ? 1 : 0 },
                 transaction: Tx

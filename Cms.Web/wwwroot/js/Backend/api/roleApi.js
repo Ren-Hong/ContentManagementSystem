@@ -1,7 +1,7 @@
-﻿export async function getRoleOptions() {
+﻿export async function getRoleLookups() {
     return await fetch('/api/roles/options', {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 function buildQueryString(payload) {
@@ -17,10 +17,10 @@ function buildQueryString(payload) {
     return query ? `?${query}` : '';
 }
 
-export async function getRoleSummaries(payload) {
+export async function getRoles(payload) {
     return await fetch(`/api/roles${buildQueryString(payload)}`, {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function createRole(payload) {
@@ -28,7 +28,7 @@ export async function createRole(payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function updateRole(roleName, payload) {
@@ -36,11 +36,11 @@ export async function updateRole(roleName, payload) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function deleteRole(roleName) {
     return await fetch(`/api/roles/${encodeURIComponent(roleName)}`, {
         method: 'DELETE'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

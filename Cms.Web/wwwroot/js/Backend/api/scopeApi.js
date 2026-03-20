@@ -1,5 +1,5 @@
-﻿export async function getScopeOptions() {
+﻿export async function getScopeLookups() {
     return await fetch('/api/scopes', {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

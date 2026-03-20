@@ -12,10 +12,10 @@ namespace Cms.Contract.Repositories.Permission.Interfaces
         Task<bool> AllPermissionsExistAsync(List<Guid> permissionIds);
 
         /// <summary>
-        /// 給下拉用的permission
+        /// 列出權限 lookup 資料
         /// </summary>
         /// <returns>拿rolename跟rolecode</returns>
-        Task<IEnumerable<PermissionOptionEntity>> GetPermissionOptionsAsync();
+        Task<IEnumerable<PermissionLookupEntity>> ListPermissionLookupsAsync();
 
 
     }

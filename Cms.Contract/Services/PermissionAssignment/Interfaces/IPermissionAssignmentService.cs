@@ -9,6 +9,6 @@ namespace Cms.Contract.Services.PermissionAssignment.Interfaces
         /// 專給下拉用的Permission
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<GetPermissionAssignmentSummariesResponseDto>> GetPermissionAssignmentSummariesAsync(PageRequest req);
+        Task<PagedResult<PermissionAssignmentListResponseDto>> ListPermissionAssignmentsAsync(PageRequest pageRequest);
     }
 }

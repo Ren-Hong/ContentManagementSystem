@@ -135,7 +135,7 @@ namespace Cms.Application.Services.Content
             }
         }
 
-        public async Task<List<GetContentsResponseDto>> GetContentsAsync(Guid typeId, Guid accountId)
+        public async Task<List<GetContentsResponseDto>> ListContentsAsync(Guid typeId, Guid accountId)
         {
             if (typeId == Guid.Empty || !await _contentRepository.ContentTypeExistsAsync(typeId))
             {
@@ -154,7 +154,7 @@ namespace Cms.Application.Services.Content
                 return [];
             }
 
-            var rows = await _contentRepository.GetContentsAsync(typeId);
+            var rows = await _contentRepository.ListContentsAsync(typeId);
 
             return rows
                 .GroupBy(

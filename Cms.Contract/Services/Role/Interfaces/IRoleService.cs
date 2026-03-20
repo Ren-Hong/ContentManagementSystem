@@ -6,16 +6,16 @@ namespace Cms.Contract.Services.Role.Interfaces
     public interface IRoleService
     {
         /// <summary>
-        /// 專給下拉用的Role
+        /// 列出角色 lookup 資料
         /// </summary>
         /// <returns></returns>
-        Task<List<GetRoleOptionsResponseDto>> GetRoleOptionsAsync();
+        Task<List<RoleLookupDto>> ListRoleLookupsAsync();
 
         /// <summary>
         /// 角色摘要table
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<GetRoleSummariesResponseDto>> GetRoleSummariesAsync(PageRequest preq);
+        Task<PagedResult<RoleListResponseDto>> ListRolesAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 建立角色

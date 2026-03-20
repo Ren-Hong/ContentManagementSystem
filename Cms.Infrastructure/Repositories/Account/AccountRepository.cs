@@ -114,9 +114,9 @@ namespace Cms.Infrastructure.Repositories.Account
             return rows.ToList();
         }
 
-        public async Task<PagedResult<AccountSummaryEntity>> GetAccountSummariesPagedAsync(PageRequest preq)
+        public async Task<PagedResult<AccountRoleAssignmentRowEntity>> ListAccountRoleAssignmentRowsAsync(PageRequest pageRequest)
         {
-            var offset = (preq.Page - 1) * preq.PageSize;
+            var offset = (pageRequest.Page - 1) * pageRequest.PageSize;
 
             const string countSql = @"
                 SELECT COUNT(DISTINCT a.AccountId)
@@ -165,15 +165,15 @@ namespace Cms.Infrastructure.Repositories.Account
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
 
-            var items = (await _db.QueryAsync<AccountSummaryEntity>(
+            var items = (await _db.QueryAsync<AccountRoleAssignmentRowEntity>(
                 dataSql,
-                new { Offset = offset, PageSize = preq.PageSize }
+                new { Offset = offset, PageSize = pageRequest.PageSize }
             )).ToList();
 
-            return new PagedResult<AccountSummaryEntity>
+            return new PagedResult<AccountRoleAssignmentRowEntity>
             {
-                Page = preq.Page,
-                PageSize = preq.PageSize,
+                Page = pageRequest.Page,
+                PageSize = pageRequest.PageSize,
                 TotalCount = totalCount,
                 Items = items
             };
@@ -294,7 +294,7 @@ namespace Cms.Infrastructure.Repositories.Account
             });
         }
 
-        public async Task<Guid> UpdateStatusAsync(string username, AccountStatus status)
+        public async Task<Guid> UpdateAccountStatusAsync(string username, AccountStatus status)
         {
             const string sql = @"
                 UPDATE Accounts

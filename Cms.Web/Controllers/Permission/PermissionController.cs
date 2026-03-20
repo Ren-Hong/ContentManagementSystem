@@ -20,17 +20,17 @@ namespace Cms.Web.Controllers.Permission
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetPermissionOptions()
+        public async Task<IActionResult> ListPermissionLookups()
         {
-            var rdto = await _permissionService.GetPermissionOptionsAsync();
+            var rdto = await _permissionService.ListPermissionLookupsAsync();
 
-            var res = rdto.Select(x => new GetPermissionOptionsResponseModel
+            var res = rdto.Select(x => new PermissionLookupResponseModel
             {
                 PermissionName = x.PermissionName,
                 PermissionId = x.PermissionId,
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetPermissionOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<PermissionLookupResponseModel>>
             {
                 Success = true,
                 Data = res

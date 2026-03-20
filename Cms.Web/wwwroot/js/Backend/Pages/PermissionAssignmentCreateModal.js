@@ -1,6 +1,6 @@
 import { createPermissionAssignment } from '../api/permissionAssignmentApi.js';
-import { getPermissionOptions } from '../api/permissionApi.js';
-import { getDepartmentOptions } from '../api/departmentApi.js';
+import { getPermissionLookups } from '../api/permissionApi.js';
+import { getDepartmentLookups } from '../api/departmentApi.js';
 
 export const PermissionAssignmentCreateModal = {
     props: {
@@ -17,8 +17,8 @@ export const PermissionAssignmentCreateModal = {
         return {
             modal: null,
 
-            permissionOptions: [],
-            departmentOptions: [],
+            permissionLookups: [],
+            departmentLookups: [],
 
             submitting: false,
 
@@ -36,8 +36,8 @@ export const PermissionAssignmentCreateModal = {
         async show(val) {
             if (val) {
                 await Promise.all([
-                    this.loadPermissionOptions(),
-                    this.loadDepartmentOptions()
+                    this.loadPermissionLookups(),
+                    this.loadDepartmentLookups()
                 ]);
 
                 this.resetForm();
@@ -57,28 +57,28 @@ export const PermissionAssignmentCreateModal = {
     },
 
     methods: {
-        async loadPermissionOptions() {
+        async loadPermissionLookups() {
             try {
-                const res = await getPermissionOptions();
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                const response = await getPermissionLookups();
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
-                this.permissionOptions = res.data;
+                this.permissionLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 權限選單載入');
             }
         },
 
-        async loadDepartmentOptions() {
+        async loadDepartmentLookups() {
             try {
-                const res = await getDepartmentOptions();
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                const response = await getDepartmentLookups();
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
-                this.departmentOptions = res.data;
+                this.departmentLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 部門選單載入');
@@ -109,9 +109,9 @@ export const PermissionAssignmentCreateModal = {
             this.submitting = true;
 
             try {
-                const res = await createPermissionAssignment(this.form);
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                const response = await createPermissionAssignment(this.form);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
@@ -151,10 +151,10 @@ export const PermissionAssignmentCreateModal = {
                             <select class="form-select"
                                     v-model="form.departmentId">
                                 <option value="">請選擇部門</option>
-                                <option v-for="d in departmentOptions"
-                                        :key="d.departmentId"
-                                        :value="d.departmentId">
-                                    {{ d.departmentName }}
+                                <option v-for="departmentLookup in departmentLookups"
+                                        :key="departmentLookup.departmentId"
+                                        :value="departmentLookup.departmentId">
+                                    {{ departmentLookup.departmentName }}
                                 </option>
                             </select>
                         </div>
@@ -164,10 +164,10 @@ export const PermissionAssignmentCreateModal = {
                             <select class="form-select"
                                     v-model="form.permissionId">
                                 <option value="">請選擇權限</option>
-                                <option v-for="p in permissionOptions"
-                                        :key="p.permissionId"
-                                        :value="p.permissionId">
-                                    {{ p.permissionName }}
+                                <option v-for="permissionLookup in permissionLookups"
+                                        :key="permissionLookup.permissionId"
+                                        :value="permissionLookup.permissionId">
+                                    {{ permissionLookup.permissionName }}
                                 </option>
                             </select>
                         </div>

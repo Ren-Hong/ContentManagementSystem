@@ -1,5 +1,5 @@
-export async function getDepartmentsForSidebar() {
+export async function getAccessibleDepartments() {
     return await fetch('/api/departments/sidebar', {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

@@ -5,15 +5,15 @@ namespace Cms.Contract.Services.Department.Interfaces
     public interface IDepartmentService
     {
         /// <summary>
-        /// 專給下拉用的Department
+        /// 列出部門 lookup 資料
         /// </summary>
         /// <returns></returns>
-        Task<List<GetDepartmentOptionsResponseDto>> GetDepartmentOptionsAsync();
+        Task<List<DepartmentLookupDto>> ListDepartmentLookupsAsync();
 
         /// <summary>
-        /// 專給側邊欄用的Department
+        /// 列出目前帳號可存取的部門
         /// </summary>
         /// <returns></returns>
-        Task<List<GetDepartmentsForSidebarResponseDto>> GetDepartmentsForSidebarAsync(Guid accountId);
+        Task<List<AccessibleDepartmentDto>> ListAccessibleDepartmentsAsync(Guid accountId);
     }
 }

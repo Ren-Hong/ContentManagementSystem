@@ -41,7 +41,7 @@ namespace Cms.Contract.Repositories.Account.Interfaces
         /// <summary>
         /// 取得所有帳戶摘要
         /// </summary>
-        Task<PagedResult<AccountSummaryEntity>> GetAccountSummariesPagedAsync(PageRequest preq);
+        Task<PagedResult<AccountRoleAssignmentRowEntity>> ListAccountRoleAssignmentRowsAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 判斷帳號是否已存在
@@ -78,7 +78,7 @@ namespace Cms.Contract.Repositories.Account.Interfaces
         /// <param name="username"></param>
         /// <param name="status"></param>
         /// <returns>後面要改中介表所以回傳guid</returns>
-        Task<Guid> UpdateStatusAsync(string username, AccountStatus status);
+        Task<Guid> UpdateAccountStatusAsync(string username, AccountStatus status);
 
         /// <summary>
         /// 重設帳密

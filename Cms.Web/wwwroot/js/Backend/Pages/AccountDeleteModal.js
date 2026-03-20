@@ -58,10 +58,10 @@ export const AccountDeleteModal = {
             this.submitting = true;
 
             try {
-                let res = await deleteAccount(this.account.username);
+                const response = await deleteAccount(this.account.username);
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 

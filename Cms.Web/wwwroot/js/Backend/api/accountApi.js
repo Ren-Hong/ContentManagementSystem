@@ -11,10 +11,10 @@
     return query ? `?${query}` : '';
 }
 
-export async function getAccountSummaries(payload) {
+export async function getAccounts(payload) {
     return await fetch(`/api/accounts${buildQueryString(payload)}`, {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function createAccount(payload) {
@@ -22,7 +22,7 @@ export async function createAccount(payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function updateAccount(username, payload) {
@@ -30,7 +30,7 @@ export async function updateAccount(username, payload) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function resetPassword(username, payload) {
@@ -38,21 +38,21 @@ export async function resetPassword(username, payload) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function deleteAccount(username) {
     return await fetch(`/api/accounts/${encodeURIComponent(username)}`, {
         method: 'DELETE'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function logout() {
-    const res = await fetch('/api/sessions/current', {
+    const response = await fetch('/api/sessions/current', {
         method: 'DELETE'
     });
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error('Logout failed');
     }
 }

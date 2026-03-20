@@ -22,22 +22,22 @@ namespace Cms.Web.Controllers.ContentType
 
         [Authorize(Policy = "Permission.Content.View")]
         [HttpGet]
-        public async Task<IActionResult> GetContentTypeOptions([FromQuery] GetContentTypeOptionsRequestModel req)
+        public async Task<IActionResult> ListContentTypeLookups([FromQuery] ListContentTypeLookupsRequestModel req)
         {
-            var dto = new GetContentTypeOptionsRequestDto
+            var dto = new ListContentTypeLookupsRequestDto
             {
                 DepartmentId = req.DepartmentId
             };
 
-            var rdto = await _contentTypeService.GetContentTypeOptionsAsync(dto, GetCurrentAccountId());
+            var rdto = await _contentTypeService.ListContentTypeLookupsAsync(dto, GetCurrentAccountId());
 
-            var res = rdto.Select(x => new GetContentTypeOptionsResponseModel
+            var res = rdto.Select(x => new ContentTypeLookupResponseModel
             {
                 TypeId = x.TypeId,
                 TypeName = x.TypeName
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetContentTypeOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<ContentTypeLookupResponseModel>>
             {
                 Success = true,
                 Data = res
@@ -86,9 +86,9 @@ namespace Cms.Web.Controllers.ContentType
 
         [Authorize(Policy = "Permission.Content.View")]
         [HttpGet("{typeId:guid}/fields")]
-        public async Task<IActionResult> GetContentFields(Guid typeId)
+        public async Task<IActionResult> ListContentFields(Guid typeId)
         {
-            var rdto = await _contentTypeService.GetContentFieldsAsync(typeId, GetCurrentAccountId());
+            var rdto = await _contentTypeService.ListContentFieldsAsync(typeId, GetCurrentAccountId());
 
             var res = rdto.Select(x => new GetContentFieldsResponseModel
             {
@@ -107,7 +107,7 @@ namespace Cms.Web.Controllers.ContentType
         }
 
         [HttpPut("{typeId:guid}")]
-        public async Task<IActionResult> UpdateContentType(Guid typeId, [FromBody] UpdateContentTypeBodyModel req)
+        public async Task<IActionResult> UpdateContentType(Guid typeId, [FromBody] UpdateContentTypeRequestModel req)
         {
             if (!ModelState.IsValid)
             {

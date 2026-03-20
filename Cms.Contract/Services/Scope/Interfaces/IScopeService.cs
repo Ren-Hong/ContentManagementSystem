@@ -5,9 +5,9 @@ namespace Cms.Contract.Services.Scope.Interfaces
     public interface IScopeService
     {
         /// <summary>
-        /// 專給下拉用的Scope
+        /// 列出 scope lookup 資料
         /// </summary>
         /// <returns></returns>
-        Task<List<GetScopeOptionsResponseDto>> GetScopeOptionsAsync();
+        Task<List<ScopeLookupDto>> ListScopeLookupsAsync();
     }
 }

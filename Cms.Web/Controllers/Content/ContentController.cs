@@ -22,9 +22,9 @@ namespace Cms.Web.Controllers.Content
 
         [Authorize(Policy = "Permission.Content.View")]
         [HttpGet("content-types/{typeId:guid}/contents")]
-        public async Task<IActionResult> GetContents(Guid typeId)
+        public async Task<IActionResult> ListContents(Guid typeId)
         {
-            var serviceResponse = await _contentService.GetContentsAsync(typeId, GetCurrentAccountId());
+            var serviceResponse = await _contentService.ListContentsAsync(typeId, GetCurrentAccountId());
 
             return Ok(new ApiResponse<IEnumerable<GetContentsResponseModel>>
             {
@@ -52,7 +52,7 @@ namespace Cms.Web.Controllers.Content
 
         [Authorize(Policy = "Permission.Content.Create")]
         [HttpPost("content-types/{typeId:guid}/contents")]
-        public async Task<IActionResult> CreateContent(Guid typeId, [FromBody] CreateContentBodyModel requestModel)
+        public async Task<IActionResult> CreateContent(Guid typeId, [FromBody] CreateContentRequestModel requestModel)
         {
             if (!ModelState.IsValid)
             {
@@ -97,7 +97,7 @@ namespace Cms.Web.Controllers.Content
 
         [Authorize(Policy = "Permission.Content.Edit")]
         [HttpPut("contents/{contentId:guid}")]
-        public async Task<IActionResult> UpdateContent(Guid contentId, [FromBody] UpdateContentBodyModel requestModel)
+        public async Task<IActionResult> UpdateContent(Guid contentId, [FromBody] UpdateContentRequestModel requestModel)
         {
             if (!ModelState.IsValid)
             {

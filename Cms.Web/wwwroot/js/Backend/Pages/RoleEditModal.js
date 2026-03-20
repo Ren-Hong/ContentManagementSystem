@@ -1,6 +1,6 @@
 ﻿import { updateRole } from '../api/roleApi.js';
-import { getPermissionOptions } from '../api/permissionApi.js';
-import { getScopeOptions } from '../api/scopeApi.js';
+import { getPermissionLookups } from '../api/permissionApi.js';
+import { getScopeLookups } from '../api/scopeApi.js';
 import { RoleStatusText } from '../constants/roleStatus.js';
 
 export const RoleEditModal = {
@@ -23,9 +23,8 @@ export const RoleEditModal = {
 
             modal: null,
 
-            permissionOptions: [],
-
-            scopeOptions: [],
+            permissionLookups: [],
+            scopeLookups: [],
             defaultScopeCode: 'Department',
             defaultScopeId: null,
 
@@ -44,8 +43,8 @@ export const RoleEditModal = {
         async show(val) {
             if (val) {
                 await Promise.all([
-                    this.loadPermissionOptions(),
-                    this.loadScopeOptions()
+                    this.loadPermissionLookups(),
+                    this.loadScopeLookups()
                 ]);
 
                 this.fillForm();
@@ -66,33 +65,33 @@ export const RoleEditModal = {
     },
 
     methods: {
-        async loadPermissionOptions() {
+        async loadPermissionLookups() {
             try {
-                let res = await getPermissionOptions();
+                const response = await getPermissionLookups();
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
-                this.permissionOptions = res.data;
+                this.permissionLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 權限選單載入');
             }
         },
 
-        async loadScopeOptions() {
-            const res = await getScopeOptions();
-            if (!res.success) {
+        async loadScopeLookups() {
+            const response = await getScopeLookups();
+            if (!response.success) {
                 alert('Scope 選單載入失敗');
                 return;
             }
 
-            this.scopeOptions = res.data;
+            this.scopeLookups = response.data;
 
-            const defaultScope = this.scopeOptions.find(
-                s => s.scopeCode === this.defaultScopeCode
+            const defaultScope = this.scopeLookups.find(
+                scopeLookup => scopeLookup.scopeCode === this.defaultScopeCode
             );
 
             this.defaultScopeId = defaultScope?.scopeId ?? null;
@@ -122,7 +121,9 @@ export const RoleEditModal = {
         },
 
         removePermission(permissionId) {
-            this.form.permissionIds = this.form.permissionIds.filter(id => id !== permissionId);
+            this.form.permissionScopes = this.form.permissionScopes.filter(
+                permissionScope => permissionScope.permissionId !== permissionId
+            );
         },
 
         updateScope(permissionId, event) {
@@ -132,8 +133,8 @@ export const RoleEditModal = {
         },
 
         getPermissionName(permissionId) {
-            const permission = this.permissionOptions.find(r => r.permissionId === permissionId);
-            return permission ? permission.permissionName : permissionId;
+            const permissionLookup = this.permissionLookups.find(lookup => lookup.permissionId === permissionId);
+            return permissionLookup ? permissionLookup.permissionName : permissionId;
         },
 
         fillForm() {
@@ -157,13 +158,13 @@ export const RoleEditModal = {
             this.submitting = true;
 
             try {
-                let res = await updateRole(this.role.roleName, {
+                const response = await updateRole(this.role.roleName, {
                     permissionScopes: this.form.permissionScopes,
                     status: this.form.status
                 });
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
@@ -215,10 +216,10 @@ export const RoleEditModal = {
                                 <select class="form-select"
                                         @change="onPermissionSelected($event)">
                                     <option value="">請選擇權限</option>
-                                    <option v-for="permission in permissionOptions"
-                                            :key="permission.permissionId"
-                                            :value="permission.permissionId">
-                                        {{ permission.permissionName }}
+                                    <option v-for="permissionLookup in permissionLookups"
+                                            :key="permissionLookup.permissionId"
+                                            :value="permissionLookup.permissionId">
+                                        {{ permissionLookup.permissionName }}
                                     </option>
                                 </select>
                             </div>
@@ -235,10 +236,10 @@ export const RoleEditModal = {
                                     <select class="form-select form-select-sm w-auto"
                                             :value="ps.scopeId"
                                             @change="updateScope(ps.permissionId, $event)">
-                                        <option v-for="s in scopeOptions"
-                                                :key="s.scopeId"
-                                                :value="s.scopeId">
-                                            {{ s.scopeName }}
+                                        <option v-for="scopeLookup in scopeLookups"
+                                                :key="scopeLookup.scopeId"
+                                                :value="scopeLookup.scopeId">
+                                            {{ scopeLookup.scopeName }}
                                         </option>
                                     </select>
 

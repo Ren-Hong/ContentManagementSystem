@@ -5,9 +5,9 @@ namespace Cms.Contract.Services.Permission.Interfaces
     public interface IPermissionService
     {
         /// <summary>
-        /// 專給下拉用的Permission
+        /// 列出權限 lookup 資料
         /// </summary>
         /// <returns></returns>
-        Task<List<GetPermissionOptionsResponseDto>> GetPermissionOptionsAsync();
+        Task<List<PermissionLookupDto>> ListPermissionLookupsAsync();
     }
 }

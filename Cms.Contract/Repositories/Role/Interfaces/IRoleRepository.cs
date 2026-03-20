@@ -14,16 +14,16 @@ namespace Cms.Contract.Repositories.Role.Interfaces
         Task<bool> AllRolesExistAsync(List<Guid> roleIds);
         
         /// <summary>
-        /// 給下拉用的role
+        /// 列出角色 lookup 資料
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<RoleOptionEntity>> GetRoleOptionsAsync();
+        Task<IEnumerable<RoleLookupEntity>> ListRoleLookupsAsync();
 
         /// <summary>
         /// 拿角色摘要
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<RoleSummaryEntity>> GetRoleSummariesPagedAsync(PageRequest preq);
+        Task<PagedResult<RolePermissionScopeRowEntity>> ListRolePermissionScopeRowsAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 判斷角色名稱是否已存在
@@ -46,7 +46,7 @@ namespace Cms.Contract.Repositories.Role.Interfaces
         /// 先改狀態後改中介表
         /// </summary>
         /// <returns>後面要改中介表所以回傳guid</returns>
-        Task<Guid> UpdateStatusAsync(string roleName, RoleStatus status);
+        Task<Guid> UpdateRoleStatusAsync(string roleName, RoleStatus status);
 
         /// <summary>
         /// 真刪角色

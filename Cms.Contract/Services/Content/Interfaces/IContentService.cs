@@ -6,7 +6,7 @@ namespace Cms.Contract.Services.Content.Interfaces
     {
         Task<CreateContentResponseDto> CreateContentAsync(CreateContentRequestDto requestDto);
 
-        Task<List<GetContentsResponseDto>> GetContentsAsync(Guid typeId, Guid accountId);
+        Task<List<GetContentsResponseDto>> ListContentsAsync(Guid typeId, Guid accountId);
 
         Task<UpdateContentResponseDto> UpdateContentAsync(UpdateContentRequestDto requestDto, Guid accountId);
 

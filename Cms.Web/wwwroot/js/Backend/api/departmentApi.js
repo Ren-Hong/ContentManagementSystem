@@ -1,5 +1,5 @@
-export async function getDepartmentOptions() {
+export async function getDepartmentLookups() {
     return await fetch('/api/departments', {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

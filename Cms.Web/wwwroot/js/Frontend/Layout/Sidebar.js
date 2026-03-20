@@ -1,4 +1,4 @@
-﻿import { getDepartmentsForSidebar } from '../api/departmentApi.js';
+﻿import { getAccessibleDepartments } from '../api/departmentApi.js';
 
 export const Sidebar = {
 
@@ -12,30 +12,30 @@ export const Sidebar = {
 
     data() {
         return {
-            menus: []
+            departments: []
         };
     },
 
     async mounted() {
-        const res = await getDepartmentsForSidebar();
-        this.menus = res.data;
+        const response = await getAccessibleDepartments();
+        this.departments = response.data;
     },
 
     template: `
         <nav class="frontend-sidebar">
 
             <div
-                v-for="menu in menus"
-                :key="menu.departmentCode"
+                v-for="department in departments"
+                :key="department.departmentCode"
                 class="frontend-sidebar-item"
-                :class="{ active: currentDepartmentCode === menu.departmentCode }"
+                :class="{ active: currentDepartmentCode === department.departmentCode }"
                 @click="$emit('page-change', {
-                    component: pages[menu.departmentCode],
-                    departmentCode: menu.departmentCode,
-                    departmentId: menu.departmentId
+                    component: pages[department.departmentCode],
+                    departmentCode: department.departmentCode,
+                    departmentId: department.departmentId
                 })"
             >
-                {{ menu.departmentName }}
+                {{ department.departmentName }}
             </div>
 
         </nav>

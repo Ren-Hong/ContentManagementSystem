@@ -4,9 +4,6 @@ namespace Cms.Contract.Controllers.Content.Models
 {
     public class UpdateContentRequestModel
     {
-        [Required(ErrorMessage = "請提供內容")]
-        public Guid ContentId { get; set; }
-
         [Required(ErrorMessage = "請提供版本")]
         public Guid RevisionId { get; set; }
 

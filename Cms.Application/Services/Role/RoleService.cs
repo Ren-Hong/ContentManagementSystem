@@ -32,12 +32,12 @@ namespace Cms.Application.Services.Role
             _scopeRepository = scopeRepository;
         }
 
-        public async Task<List<GetRoleOptionsResponseDto>> GetRoleOptionsAsync()
+        public async Task<List<RoleLookupDto>> ListRoleLookupsAsync()
         {
-            var rows = await _roleRepository.GetRoleOptionsAsync();
+            var rows = await _roleRepository.ListRoleLookupsAsync();
 
             return rows
-                .Select(x => new GetRoleOptionsResponseDto
+                .Select(x => new RoleLookupDto
                 {
                     RoleId = x.RoleId,
                     RoleName = x.RoleName
@@ -45,13 +45,13 @@ namespace Cms.Application.Services.Role
                 .ToList();
         }
 
-        public async Task<PagedResult<GetRoleSummariesResponseDto>> GetRoleSummariesAsync(PageRequest preq)
+        public async Task<PagedResult<RoleListResponseDto>> ListRolesAsync(PageRequest pageRequest)
         {
-            var pagedRows = await _roleRepository.GetRoleSummariesPagedAsync(preq);
+            var pagedRows = await _roleRepository.ListRolePermissionScopeRowsAsync(pageRequest);
 
             var grouped = pagedRows.Items
                 .GroupBy(r => new { r.RoleId, r.RoleName, r.Status })
-                .Select(roleGroup => new GetRoleSummariesResponseDto
+                .Select(roleGroup => new RoleListResponseDto
                 {
                     RoleId = roleGroup.Key.RoleId,
                     RoleName = roleGroup.Key.RoleName,
@@ -60,14 +60,14 @@ namespace Cms.Application.Services.Role
                     PermissionScopes = roleGroup
                         .Where(x => x.PermissionId.HasValue)
                         .GroupBy(x => new { x.PermissionId, x.PermissionName })
-                        .Select(pGroup => new PermissionScopesSummaryDto
+                        .Select(pGroup => new RolePermissionScopeResponseDto
                         {
                             PermissionId = pGroup.Key.PermissionId!.Value,
                             PermissionName = pGroup.Key.PermissionName!,
 
                             Scopes = pGroup
                                 .Where(s => s.ScopeId.HasValue)
-                                .Select(s => new ScopeSummaryDto
+                                .Select(s => new RoleScopeResponseDto
                                 {
                                     ScopeId = s.ScopeId!.Value,
                                     ScopeName = s.ScopeName!
@@ -79,7 +79,7 @@ namespace Cms.Application.Services.Role
                 })
                 .ToList();
 
-            return new PagedResult<GetRoleSummariesResponseDto>
+            return new PagedResult<RoleListResponseDto>
             {
                 Page = pagedRows.Page,
                 PageSize = pagedRows.PageSize,
@@ -271,7 +271,7 @@ namespace Cms.Application.Services.Role
             try
             {
                 // 更新帳戶狀態
-                var roleId = await _roleRepository.UpdateStatusAsync(
+                var roleId = await _roleRepository.UpdateRoleStatusAsync(
                     dto.RoleName,
                     dto.Status
                 );

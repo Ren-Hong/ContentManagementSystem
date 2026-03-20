@@ -58,10 +58,10 @@ export const RoleDeleteModal = {
             this.submitting = true;
 
             try {
-                let res = await deleteRole(this.role.roleName);
+                const response = await deleteRole(this.role.roleName);
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 

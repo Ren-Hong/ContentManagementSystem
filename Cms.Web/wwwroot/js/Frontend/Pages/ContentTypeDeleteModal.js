@@ -52,10 +52,10 @@ export const ContentTypeDeleteModal = {
             this.submitting = true;
 
             try {
-                const res = await deleteContentType(this.contentType.typeId);
+                const response = await deleteContentType(this.contentType.typeId);
 
-                if (!res.success) {
-                    alert(res.errorCode || '刪除問卷失敗');
+                if (!response.success) {
+                    alert(response.errorCode || '刪除問卷失敗');
                     return;
                 }
 

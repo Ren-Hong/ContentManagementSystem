@@ -1,6 +1,5 @@
 ﻿using Cms.Contract.Controllers.Api;
 using Cms.Contract.Controllers.Scope.Models;
-using Cms.Contract.Services.Scope.Dtos;
 using Cms.Contract.Services.Scope.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,18 +20,18 @@ namespace Cms.Web.Controllers.Scope
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetScopeOptions()
+        public async Task<IActionResult> ListScopeLookups()
         {
-            var rdto = await _scopeService.GetScopeOptionsAsync();
+            var rdto = await _scopeService.ListScopeLookupsAsync();
 
-            var res = rdto.Select(x => new GetScopeOptionsResponseModel
+            var res = rdto.Select(x => new ScopeLookupResponseModel
             {
                 ScopeName = x.ScopeName,
                 ScopeCode = x.ScopeCode,
                 ScopeId = x.ScopeId,
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetScopeOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<ScopeLookupResponseModel>>
             {
                 Success = true,
                 Data = res

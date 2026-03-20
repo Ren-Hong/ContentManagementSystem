@@ -1,6 +1,6 @@
 ﻿import { createAccount } from '../api/accountApi.js';
-import { getRoleOptions } from '../api/roleApi.js';
-import { getDepartmentOptions } from '../api/departmentApi.js';
+import { getRoleLookups } from '../api/roleApi.js';
+import { getDepartmentLookups } from '../api/departmentApi.js';
 
 export const AccountCreateModal = {
     props: {
@@ -15,8 +15,8 @@ export const AccountCreateModal = {
     data() {
         return {
             modal: null,        // Bootstrap Modal instance
-            roleOptions: [],
-            departmentOptions: [],
+            roleLookups: [],
+            departmentLookups: [],
             form: {
                 username: '',
                 password: '',
@@ -34,8 +34,8 @@ export const AccountCreateModal = {
     watch: {                        // watch =「當某個值改變時，我要額外做一件事」
         async show(val) {                 //「只要 show 這個 prop 的值改變，如果它變成 true，我就把表單清空。」
             if (val) {
-                await this.loadRoleOptions(); 
-                await this.loadDepartmentOptions();
+                await this.loadRoleLookups();
+                await this.loadDepartmentLookups();
 
                 this.resetForm();
                 this.modal.show();
@@ -56,32 +56,32 @@ export const AccountCreateModal = {
     },
 
     methods: {
-        async loadRoleOptions() {
+        async loadRoleLookups() {
             try {
-                let res = await getRoleOptions();
+                const response = await getRoleLookups();
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
-                this.roleOptions = res.data;
+                this.roleLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 角色選單載入');
             }
         },
 
-        async loadDepartmentOptions() {
+        async loadDepartmentLookups() {
             try {
-                let res = await getDepartmentOptions();
+                const response = await getDepartmentLookups();
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
-                this.departmentOptions = res.data;
+                this.departmentLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 部門選單載入');
@@ -109,7 +109,7 @@ export const AccountCreateModal = {
         },
 
         getRoleName(roleId) {
-            const role = this.roleOptions.find(r => r.roleId === roleId);
+            const role = this.roleLookups.find(roleLookup => roleLookup.roleId === roleId);
             return role ? role.roleName : roleId;
         },
 
@@ -135,10 +135,10 @@ export const AccountCreateModal = {
             this.submitting = true;
 
             try {
-                let res = await createAccount(this.form);
+                const response = await createAccount(this.form);
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
@@ -191,10 +191,10 @@ export const AccountCreateModal = {
                                 <select class="form-select"
                                         @change="onRoleSelected($event)">
                                     <option value="">請選擇角色</option>
-                                    <option v-for="r in roleOptions"
-                                            :key="r.roleId"
-                                            :value="r.roleId">
-                                        {{ r.roleName }}
+                                    <option v-for="roleLookup in roleLookups"
+                                            :key="roleLookup.roleId"
+                                            :value="roleLookup.roleId">
+                                        {{ roleLookup.roleName }}
                                     </option>
                                 </select>
                             </div>
@@ -211,15 +211,15 @@ export const AccountCreateModal = {
                                 </button>
 
                                 <div class="d-flex flex-wrap gap-3">
-                                    <div v-for="d in departmentOptions"
-                                        :key="d.departmentId">
+                                    <div v-for="departmentLookup in departmentLookups"
+                                        :key="departmentLookup.departmentId">
 
                                         <label>
                                             <input type="checkbox"
-                                                    :value="d.departmentId"
+                                                    :value="departmentLookup.departmentId"
                                                     v-model="ra.departmentIds">
 
-                                            {{ d.departmentName }}
+                                            {{ departmentLookup.departmentName }}
                                         </label>
                                     </div>
                                 </div>

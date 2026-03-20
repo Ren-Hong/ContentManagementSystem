@@ -1,6 +1,6 @@
 ﻿import { createRole } from '../api/roleApi.js';
-import { getPermissionOptions } from '../api/permissionApi.js';
-import { getScopeOptions } from '../api/scopeApi.js';
+import { getPermissionLookups } from '../api/permissionApi.js';
+import { getScopeLookups } from '../api/scopeApi.js';
 
 export const RoleCreateModal = {
     props: {
@@ -16,9 +16,8 @@ export const RoleCreateModal = {
         return {
             modal: null,        
 
-            permissionOptions: [],
-
-            scopeOptions: [],
+            permissionLookups: [],
+            scopeLookups: [],
             defaultScopeCode: 'Department',
             defaultScopeId: null,
 
@@ -36,8 +35,8 @@ export const RoleCreateModal = {
         async show(val) {                
             if (val) {
                 await Promise.all([
-                    this.loadPermissionOptions(),
-                    this.loadScopeOptions()
+                    this.loadPermissionLookups(),
+                    this.loadScopeLookups()
                 ]);
 
                 this.resetForm();
@@ -57,34 +56,34 @@ export const RoleCreateModal = {
     },
 
     methods: {
-        async loadPermissionOptions() {
+        async loadPermissionLookups() {
             try {
-                let res = await getPermissionOptions();
+                const response = await getPermissionLookups();
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
-                this.permissionOptions = res.data;
+                this.permissionLookups = response.data;
             } catch (err) {
                 console.error(err);
                 alert('系統錯誤 -> 權限選單載入');
             }
         },
 
-        async loadScopeOptions() {
+        async loadScopeLookups() {
             try {
-                const res = await getScopeOptions();
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                const response = await getScopeLookups();
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
-                this.scopeOptions = res.data;
+                this.scopeLookups = response.data;
 
                 // ✅ 用 ScopeCode 找 Department 的 GUID
-                const defaultScope = this.scopeOptions.find(
-                    s => s.scopeCode === this.defaultScopeCode
+                const defaultScope = this.scopeLookups.find(
+                    scopeLookup => scopeLookup.scopeCode === this.defaultScopeCode
                 );
 
                 this.defaultScopeId = defaultScope
@@ -129,13 +128,13 @@ export const RoleCreateModal = {
         },
 
         getPermissionName(permissionId) {
-            const p = this.permissionOptions.find(r => r.permissionId === permissionId);
-            return p ? p.permissionName : permissionId;
+            const permissionLookup = this.permissionLookups.find(lookup => lookup.permissionId === permissionId);
+            return permissionLookup ? permissionLookup.permissionName : permissionId;
         },
 
         getScopeName(scopeId) { 
-            const s = this.scopeOptions.find(x => x.scopeId === scopeId);
-            return s ? (s.scopeName || s.scopeCode) : scopeId;
+            const scopeLookup = this.scopeLookups.find(lookup => lookup.scopeId === scopeId);
+            return scopeLookup ? (scopeLookup.scopeName || scopeLookup.scopeCode) : scopeId;
         },
 
         resetForm() {
@@ -155,10 +154,10 @@ export const RoleCreateModal = {
             this.submitting = true;
 
             try {
-                let res = await createRole(this.form);
+                const response = await createRole(this.form);
 
-                if (!res.success) {
-                    alert(`錯誤代碼 -> ${res.errorCode}`);
+                if (!response.success) {
+                    alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
                 }
 
@@ -210,10 +209,10 @@ export const RoleCreateModal = {
                                 <select class="form-select"
                                         @change="onPermissionSelected($event)">
                                     <option value="">請選擇權限</option>
-                                    <option v-for="p in permissionOptions"
-                                            :key="p.permissionId"
-                                            :value="p.permissionId">
-                                        {{ p.permissionName }}
+                                    <option v-for="permissionLookup in permissionLookups"
+                                            :key="permissionLookup.permissionId"
+                                            :value="permissionLookup.permissionId">
+                                        {{ permissionLookup.permissionName }}
                                     </option>
                                 </select>
                             </div>
@@ -233,10 +232,10 @@ export const RoleCreateModal = {
                                         :value="ps.scopeId"
                                         @change="updateScope(ps.permissionId, $event)"
                                     >
-                                        <option v-for="s in scopeOptions"
-                                                :key="s.scopeId"
-                                                :value="s.scopeId">
-                                        {{ s.scopeName }}
+                                        <option v-for="scopeLookup in scopeLookups"
+                                                :key="scopeLookup.scopeId"
+                                                :value="scopeLookup.scopeId">
+                                        {{ scopeLookup.scopeName }}
                                         </option>
                                     </select>
 

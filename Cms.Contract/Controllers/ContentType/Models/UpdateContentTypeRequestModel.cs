@@ -4,9 +4,6 @@ namespace Cms.Contract.Controllers.ContentType.Models
 {
     public class UpdateContentTypeRequestModel
     {
-        [Required(ErrorMessage = "請提供問卷")]
-        public Guid TypeId { get; set; }
-
         [Required(ErrorMessage = "請輸入問卷名稱")]
         public required string TypeName { get; set; }
 

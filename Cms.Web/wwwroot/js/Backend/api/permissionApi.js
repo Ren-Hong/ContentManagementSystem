@@ -1,5 +1,5 @@
-﻿export async function getPermissionOptions() {
+﻿export async function getPermissionLookups() {
     return await fetch('/api/permissions', {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

@@ -25,12 +25,12 @@ namespace Cms.Application.Services.Department
             _permissionScopeService = permissionScopeService;
         }
 
-        public async Task<List<GetDepartmentOptionsResponseDto>> GetDepartmentOptionsAsync()
+        public async Task<List<DepartmentLookupDto>> ListDepartmentLookupsAsync()
         {
-            var rows = await _departmentRepository.GetDepartmentOptionsAsync();
+            var rows = await _departmentRepository.ListDepartmentLookupsAsync();
 
             return rows
-                .Select(x => new GetDepartmentOptionsResponseDto
+                .Select(x => new DepartmentLookupDto
                 {
                     DepartmentId = x.DepartmentId,
                     DepartmentName = x.DepartmentName
@@ -38,7 +38,7 @@ namespace Cms.Application.Services.Department
                 .ToList();
         }
 
-        public async Task<List<GetDepartmentsForSidebarResponseDto>> GetDepartmentsForSidebarAsync(Guid accountId)
+        public async Task<List<AccessibleDepartmentDto>> ListAccessibleDepartmentsAsync(Guid accountId)
         {
             if (accountId == Guid.Empty)
             {
@@ -51,11 +51,11 @@ namespace Cms.Application.Services.Department
             );
 
             var rows = hasGlobalScope
-                ? await _departmentRepository.GetDepartmentsForSidebarAsync()
+                ? await _departmentRepository.ListAccessibleDepartmentsAsync()
                 : await GetDepartmentScopedRowsAsync(accountId);
 
             return rows
-                .Select(x => new GetDepartmentsForSidebarResponseDto
+                .Select(x => new AccessibleDepartmentDto
                 {
                     DepartmentId = x.DepartmentId,
                     DepartmentCode = x.DepartmentCode,
@@ -64,7 +64,7 @@ namespace Cms.Application.Services.Department
                 .ToList();
         }
 
-        private async Task<IEnumerable<Cms.Contract.Repositories.Department.Entities.DepartmentSidebarEntity>> GetDepartmentScopedRowsAsync(Guid accountId)
+        private async Task<IEnumerable<Cms.Contract.Repositories.Department.Entities.AccessibleDepartmentEntity>> GetDepartmentScopedRowsAsync(Guid accountId)
         {
             var departmentIds = await _permissionScopeService.GetDepartmentScopeDepartmentIdsAsync(
                 accountId,
@@ -76,7 +76,7 @@ namespace Cms.Application.Services.Department
                 return [];
             }
 
-            return await _departmentRepository.GetDepartmentsForSidebarAsync(departmentIds);
+            return await _departmentRepository.ListAccessibleDepartmentsAsync(departmentIds);
         }
     }
 }

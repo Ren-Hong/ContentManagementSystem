@@ -21,22 +21,22 @@ namespace Cms.Web.Controllers.PermissionAssignment
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPermissionAssignmentSummaries([FromQuery] PageRequest req)
+        public async Task<IActionResult> ListPermissionAssignments([FromQuery] PageRequest req)
         {
-            var paged = await _permissionAssignmentService.GetPermissionAssignmentSummariesAsync(req);
+            var paged = await _permissionAssignmentService.ListPermissionAssignmentsAsync(req);
 
             var res = paged.Items
-                .Select(x => new GetPermissionAssignmentSummariesResponseModel
+                .Select(x => new PermissionAssignmentListResponseModel
                 {
                     AccountId = x.AccountId,
                     Username = x.Username,
                     PermissionDepartments = x.PermissionDepartments?
-                        .Select(p => new PermissionDepartmentsSummaryResponseModel
+                        .Select(p => new PermissionDepartmentResponseModel
                         {
                             PermissionId = p.PermissionId,
                             PermissionName = p.PermissionName,
                             Departments = p.Departments?
-                                .Select(d => new DepartmentSummaryResponseModel
+                                .Select(d => new AssignedDepartmentResponseModel
                                 {
                                     DepartmentId = d.DepartmentId,
                                     DepartmentName = d.DepartmentName,
@@ -49,10 +49,10 @@ namespace Cms.Web.Controllers.PermissionAssignment
                 })
                 .ToList();
 
-            return Ok(new ApiResponse<PagedResult<GetPermissionAssignmentSummariesResponseModel>>
+            return Ok(new ApiResponse<PagedResult<PermissionAssignmentListResponseModel>>
             {
                 Success = true,
-                Data = new PagedResult<GetPermissionAssignmentSummariesResponseModel>
+                Data = new PagedResult<PermissionAssignmentListResponseModel>
                 {
                     Page = paged.Page,
                     PageSize = paged.PageSize,

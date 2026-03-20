@@ -66,8 +66,8 @@ export const ContentTypeEditModal = {
             this.loading = true;
 
             try {
-                const res = await getContentFields(this.contentType.typeId);
-                const fields = (res.data || []).map(x => ({
+                const response = await getContentFields(this.contentType.typeId);
+                const fields = (response.data || []).map(x => ({
                     fieldId: x.fieldId,
                     fieldName: x.fieldName || x.fieldCode,
                     fieldType: x.fieldType,
@@ -111,7 +111,7 @@ export const ContentTypeEditModal = {
             this.submitting = true;
 
             try {
-                const res = await updateContentType(this.form.typeId, {
+                const response = await updateContentType(this.form.typeId, {
                     typeName: this.form.typeName.trim(),
                     fields: this.form.fields.map(x => ({
                         fieldId: x.fieldId,
@@ -121,8 +121,8 @@ export const ContentTypeEditModal = {
                     }))
                 });
 
-                if (!res.success) {
-                    alert(res.errorCode || '更新問卷失敗');
+                if (!response.success) {
+                    alert(response.errorCode || '更新問卷失敗');
                     return;
                 }
 

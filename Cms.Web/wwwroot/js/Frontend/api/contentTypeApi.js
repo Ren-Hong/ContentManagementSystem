@@ -11,10 +11,10 @@ function buildQueryString(payload) {
     return query ? `?${query}` : '';
 }
 
-export async function getContentTypeOptions(payload) {
+export async function getContentTypeLookups(payload) {
     return await fetch(`/api/content-types${buildQueryString(payload)}`, {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function createContentType(payload) {
@@ -22,7 +22,7 @@ export async function createContentType(payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function updateContentType(typeId, payload) {
@@ -30,11 +30,11 @@ export async function updateContentType(typeId, payload) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function deleteContentType(typeId) {
     return await fetch(`/api/content-types/${typeId}`, {
         method: 'DELETE'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

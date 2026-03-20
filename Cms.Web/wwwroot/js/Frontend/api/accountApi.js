@@ -1,9 +1,9 @@
 ﻿export async function logout() {
-    const res = await fetch('/api/sessions/current', {
+    const response = await fetch('/api/sessions/current', {
         method: 'DELETE'
     });
 
-    if (!res.ok) {
+    if (!response.ok) {
         throw new Error('Logout failed');
     }
 }

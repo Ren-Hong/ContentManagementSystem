@@ -20,14 +20,14 @@ namespace Cms.Application.Services.PermissionAssignment
             _permissionAssignmentRepository = permissionAssignmentRepository;
         }
 
-        public async Task<PagedResult<GetPermissionAssignmentSummariesResponseDto>> GetPermissionAssignmentSummariesAsync(PageRequest req)
+        public async Task<PagedResult<PermissionAssignmentListResponseDto>> ListPermissionAssignmentsAsync(PageRequest pageRequest)
         {
             var paged = await _permissionAssignmentRepository
-                .GetPermissionAssignmentSummariesPagedAsync(req);
+                .ListPermissionAssignmentRowsAsync(pageRequest);
 
             var grouped = paged.Items
                 .GroupBy(x => new { x.AccountId, x.Username })
-                .Select(accountGroup => new GetPermissionAssignmentSummariesResponseDto
+                .Select(accountGroup => new PermissionAssignmentListResponseDto
                 {
                     AccountId = accountGroup.Key.AccountId,
                     Username = accountGroup.Key.Username,
@@ -35,14 +35,14 @@ namespace Cms.Application.Services.PermissionAssignment
                     PermissionDepartments =
                         accountGroup
                         .GroupBy(p => new { p.PermissionId, p.PermissionName })
-                        .Select(permissionGroup => new PermissionDepartmentsSummaryDto
+                        .Select(permissionGroup => new PermissionDepartmentResponseDto
                         {
                             PermissionId = permissionGroup.Key.PermissionId,
                             PermissionName = permissionGroup.Key.PermissionName,
 
                             Departments =
                                 permissionGroup
-                                .Select(d => new DepartmentSummaryDto
+                                .Select(d => new AssignedDepartmentResponseDto
                                 {
                                     DepartmentId = d.DepartmentId,
                                     DepartmentName = d.DepartmentName,
@@ -55,7 +55,7 @@ namespace Cms.Application.Services.PermissionAssignment
                 })
                 .ToList();
 
-            return new PagedResult<GetPermissionAssignmentSummariesResponseDto>
+            return new PagedResult<PermissionAssignmentListResponseDto>
             {
                 Page = paged.Page,
                 PageSize = paged.PageSize,

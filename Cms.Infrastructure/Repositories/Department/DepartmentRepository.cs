@@ -33,7 +33,7 @@ namespace Cms.Infrastructure.Repositories.Department
             return count == departmentIds.Count;
         }
 
-        public async Task<IEnumerable<DepartmentOptionEntity>> GetDepartmentOptionsAsync()
+        public async Task<IEnumerable<DepartmentLookupEntity>> ListDepartmentLookupsAsync()
         {
             const string sql = @"
                 SELECT
@@ -44,13 +44,13 @@ namespace Cms.Infrastructure.Repositories.Department
                 ORDER BY DepartmentName
             ";
 
-            return await _db.QueryAsync<DepartmentOptionEntity>(
+            return await _db.QueryAsync<DepartmentLookupEntity>(
                 sql,
                 transaction: Tx
             );
         }
 
-        public async Task<IEnumerable<DepartmentSidebarEntity>> GetDepartmentsForSidebarAsync()
+        public async Task<IEnumerable<AccessibleDepartmentEntity>> ListAccessibleDepartmentsAsync()
         {
 
             const string sql = @"
@@ -63,13 +63,13 @@ namespace Cms.Infrastructure.Repositories.Department
                 ORDER BY DepartmentCode
             ";
 
-            return await _db.QueryAsync<DepartmentSidebarEntity>(
+            return await _db.QueryAsync<AccessibleDepartmentEntity>(
                 sql,
                 transaction: Tx
             );
         }
 
-        public async Task<IEnumerable<DepartmentSidebarEntity>> GetDepartmentsForSidebarAsync(IEnumerable<Guid> departmentIds)
+        public async Task<IEnumerable<AccessibleDepartmentEntity>> ListAccessibleDepartmentsAsync(IEnumerable<Guid> departmentIds)
         {
             const string sql = @"
                 SELECT
@@ -82,7 +82,7 @@ namespace Cms.Infrastructure.Repositories.Department
                 ORDER BY DepartmentCode
             ";
 
-            return await _db.QueryAsync<DepartmentSidebarEntity>(
+            return await _db.QueryAsync<AccessibleDepartmentEntity>(
                 sql,
                 new { DepartmentIds = departmentIds },
                 transaction: Tx

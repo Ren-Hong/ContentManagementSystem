@@ -16,7 +16,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
         }
 
-        public async Task<IEnumerable<ContentTypeOptionEntity>> GetContentTypeOptionsAsync(Guid departmentId)
+        public async Task<IEnumerable<ContentTypeLookupEntity>> ListContentTypeLookupsAsync(Guid departmentId)
         {
             const string sql = @"
                 SELECT
@@ -29,7 +29,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 ORDER BY TypeName
             ";
 
-            return await _db.QueryAsync<ContentTypeOptionEntity>(
+            return await _db.QueryAsync<ContentTypeLookupEntity>(
                 sql,
                 new
                 {
@@ -39,7 +39,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
             );
         }
 
-        public async Task<IEnumerable<ContentFieldEntity>> GetContentFieldsAsync(Guid typeId)
+        public async Task<IEnumerable<ContentFieldEntity>> ListContentFieldsAsync(Guid typeId)
         {
             const string sql = @"
                 SELECT

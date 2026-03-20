@@ -106,16 +106,16 @@ namespace Cms.Web.Controllers.Account
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAccountSummaries([FromQuery] PageRequest req)
+        public async Task<IActionResult> ListAccounts([FromQuery] PageRequest req)
         {
-            var rdto = await _accountService.GetAccountSummariesAsync(req);
+            var rdto = await _accountService.ListAccountsAsync(req);
 
-            var res = new PagedResult<GetAccountSummariesResponseModel>
+            var res = new PagedResult<AccountListResponseModel>
             {
                 Page = rdto.Page,
                 PageSize = rdto.PageSize,
                 TotalCount = rdto.TotalCount,
-                Items = rdto.Items.Select(x => new GetAccountSummariesResponseModel
+                Items = rdto.Items.Select(x => new AccountListResponseModel
                 {
                     AccountId = x.AccountId,
                     Username = x.Username,
@@ -124,7 +124,7 @@ namespace Cms.Web.Controllers.Account
                     {
                         RoleId = d.RoleId,
                         RoleName = d.RoleName,
-                        Departments = d.Departments.Select(dep => new GetDepartmentOptionsResponseModel
+                        Departments = d.Departments.Select(dep => new DepartmentLookupResponseModel
                         {
                             DepartmentId = dep.DepartmentId,
                             DepartmentName = dep.DepartmentName
@@ -133,7 +133,7 @@ namespace Cms.Web.Controllers.Account
                 }).ToList()
             };
 
-            return Ok(new ApiResponse<PagedResult<GetAccountSummariesResponseModel>>
+            return Ok(new ApiResponse<PagedResult<AccountListResponseModel>>
             {
                 Success = true,
                 Data = res
@@ -173,7 +173,7 @@ namespace Cms.Web.Controllers.Account
         }
 
         [HttpPut("{username}")]
-        public async Task<IActionResult> UpdateAccount(string username, [FromBody] UpdateAccountBodyModel req)
+        public async Task<IActionResult> UpdateAccount(string username, [FromBody] UpdateAccountRequestModel req)
         {
             if (!ModelState.IsValid)
             {
@@ -205,7 +205,7 @@ namespace Cms.Web.Controllers.Account
         }
 
         [HttpPut("{username}/password")]
-        public async Task<IActionResult> ResetPassword(string username, [FromBody] ResetPasswordBodyModel req)
+        public async Task<IActionResult> ResetPassword(string username, [FromBody] ResetPasswordRequestModel req)
         {
             if (!ModelState.IsValid)
             {

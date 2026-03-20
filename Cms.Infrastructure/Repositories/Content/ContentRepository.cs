@@ -160,7 +160,7 @@ namespace Cms.Infrastructure.Repositories.Content
             return fields.ToList();
         }
 
-        public async Task<List<ContentEntity>> GetContentsAsync(Guid typeId)
+        public async Task<List<ContentEntity>> ListContentsAsync(Guid typeId)
         {
             const string sql = @"
                 SELECT

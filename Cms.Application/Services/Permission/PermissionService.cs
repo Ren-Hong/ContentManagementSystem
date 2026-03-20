@@ -19,12 +19,12 @@ namespace Cms.Application.Services.Permission
             _permissionRepository = permissionRepository;
         }
 
-        public async Task<List<GetPermissionOptionsResponseDto>> GetPermissionOptionsAsync()
+        public async Task<List<PermissionLookupDto>> ListPermissionLookupsAsync()
         {
-            var rows = await _permissionRepository.GetPermissionOptionsAsync();
+            var rows = await _permissionRepository.ListPermissionLookupsAsync();
 
             return rows
-                .Select(x => new GetPermissionOptionsResponseDto
+                .Select(x => new PermissionLookupDto
                 {
                     PermissionId = x.PermissionId,
                     PermissionName = x.PermissionName

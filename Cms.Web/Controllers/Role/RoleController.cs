@@ -22,17 +22,17 @@ namespace Cms.Web.Controllers.Role
 
         [HttpGet("options")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetRoleOptions()
+        public async Task<IActionResult> ListRoleLookups()
         {
-            var rdto = await _roleService.GetRoleOptionsAsync();
+            var rdto = await _roleService.ListRoleLookupsAsync();
 
-            var res = rdto.Select(x => new GetRoleOptionsResponseModel
+            var res = rdto.Select(x => new RoleLookupResponseModel
             {
                 RoleName = x.RoleName,
                 RoleId = x.RoleId,
             }).ToList();
 
-            return Ok(new ApiResponse<IEnumerable<GetRoleOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<RoleLookupResponseModel>>
             {
                 Success = true,
                 Data = res
@@ -40,27 +40,27 @@ namespace Cms.Web.Controllers.Role
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRoleSummaries([FromQuery] PageRequest req)
+        public async Task<IActionResult> ListRoles([FromQuery] PageRequest req)
         {
-            var rdto = await _roleService.GetRoleSummariesAsync(req);
+            var rdto = await _roleService.ListRolesAsync(req);
 
-            var res = new PagedResult<GetRoleSummariesResponseModel>
+            var res = new PagedResult<RoleListResponseModel>
             {
                 Page = rdto.Page,
                 PageSize = rdto.PageSize,
                 TotalCount = rdto.TotalCount,
-                Items = rdto.Items.Select(x => new GetRoleSummariesResponseModel
+                Items = rdto.Items.Select(x => new RoleListResponseModel
                 {
                     RoleId = x.RoleId,
                     RoleName = x.RoleName,
                     Status = x.Status,
                     PermissionScopes = x.PermissionScopes
-                        .Select(p => new PermissionScopesSummaryModel
+                        .Select(p => new RolePermissionScopeResponseModel
                         {
                             PermissionId = p.PermissionId,
                             PermissionName = p.PermissionName,
                             Scopes = p.Scopes
-                                .Select(s => new ScopeSummaryModel
+                                .Select(s => new RoleScopeResponseModel
                                 {
                                     ScopeId = s.ScopeId,
                                     ScopeName = s.ScopeName
@@ -71,7 +71,7 @@ namespace Cms.Web.Controllers.Role
                 }).ToList()
             };
 
-            return Ok(new ApiResponse<PagedResult<GetRoleSummariesResponseModel>>
+            return Ok(new ApiResponse<PagedResult<RoleListResponseModel>>
             {
                 Success = true,
                 Data = res
@@ -113,7 +113,7 @@ namespace Cms.Web.Controllers.Role
         }
 
         [HttpPut("{roleName}")]
-        public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleBodyModel req)
+        public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleRequestModel req)
         {
             if (!ModelState.IsValid)
             {

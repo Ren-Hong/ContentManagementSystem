@@ -11,10 +11,10 @@ function buildQueryString(payload) {
     return query ? `?${query}` : '';
 }
 
-export async function getPermissionAssignmentSummaries(payload) {
+export async function getPermissionAssignments(payload) {
     return await fetch(`/api/permission-assignments${buildQueryString(payload)}`, {
         method: 'GET'
-    }).then(r => r.json());
+    }).then(response => response.json());
 }
 
 export async function createPermissionAssignment(payload) {
@@ -22,5 +22,5 @@ export async function createPermissionAssignment(payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(r => r.json());
+    }).then(response => response.json());
 }

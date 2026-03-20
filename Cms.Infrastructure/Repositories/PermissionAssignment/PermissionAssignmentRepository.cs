@@ -17,10 +17,10 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
         {
         }
 
-        public async Task<PagedResult<PermissionAssignmentSummaryEntity>> GetPermissionAssignmentSummariesPagedAsync(PageRequest preq)
+        public async Task<PagedResult<PermissionAssignmentRowEntity>> ListPermissionAssignmentRowsAsync(PageRequest pageRequest)
         {
-            var page = preq.Page <= 0 ? 1 : preq.Page;
-            var pageSize = preq.PageSize <= 0 ? 10 : preq.PageSize;
+            var page = pageRequest.Page <= 0 ? 1 : pageRequest.Page;
+            var pageSize = pageRequest.PageSize <= 0 ? 10 : pageRequest.PageSize;
             var offset = (page - 1) * pageSize;
 
             const string countSql = @"
@@ -57,7 +57,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
 
-            var items = (await _db.QueryAsync<PermissionAssignmentSummaryEntity>(
+            var items = (await _db.QueryAsync<PermissionAssignmentRowEntity>(
                 dataSql,
                 new
                 {
@@ -66,7 +66,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
                 }
             )).ToList();
 
-            return new PagedResult<PermissionAssignmentSummaryEntity>
+            return new PagedResult<PermissionAssignmentRowEntity>
             {
                 Page = page,
                 PageSize = pageSize,

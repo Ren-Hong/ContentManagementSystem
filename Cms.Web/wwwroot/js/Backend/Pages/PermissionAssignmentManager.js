@@ -1,4 +1,4 @@
-import { getPermissionAssignmentSummaries } from '../api/permissionAssignmentApi.js';
+import { getPermissionAssignments } from '../api/permissionAssignmentApi.js';
 
 import { PermissionAssignmentCreateModal } from './PermissionAssignmentCreateModal.js';
 import { PermissionAssignmentEditModal } from './PermissionAssignmentEditModal.js';
@@ -13,7 +13,7 @@ export const PermissionAssignmentManager = {
 
     data() {
         return {
-            permissionAssignmentSummaries: [],
+            permissionAssignments: [],
 
             page: 1,
             pageSize: 10,
@@ -30,25 +30,30 @@ export const PermissionAssignmentManager = {
     },
 
     mounted() {
-        this.loadPermissionAssignmentSummaries();
+        this.loadPermissionAssignments();
     },
 
     methods: {
-        async loadPermissionAssignmentSummaries() {
+        async loadPermissionAssignments() {
             this.loading = true;
             try {
-                const res = await getPermissionAssignmentSummaries({
+                const response = await getPermissionAssignments({
                     page: this.page,
                     pageSize: this.pageSize,
                     keyword: document.getElementById('permissionAssignmentSearch')?.value
                 });
 
-                this.permissionAssignmentSummaries = res.data.items;
-                this.totalCount = res.data.totalCount;
+                this.permissionAssignments = response.data.items;
+                this.totalCount = response.data.totalCount;
 
             } finally {
                 this.loading = false;
             }
+        },
+
+        searchPermissionAssignments() {
+            this.page = 1;
+            this.loadPermissionAssignments();
         },
 
         changePage(p) {
@@ -58,21 +63,21 @@ export const PermissionAssignmentManager = {
             if (p > maxPage) return;
 
             this.page = p;
-            this.loadPermissionAssignmentSummaries();
+            this.loadPermissionAssignments();
         },
 
-        openCreate(permissionAssignmentSummary) {
+        openCreate(permissionAssignment) {
             this.showCreate = true;
-            this.selectedPermissionAssignment = permissionAssignmentSummary;
+            this.selectedPermissionAssignment = permissionAssignment;
         },
 
-        openEdit(permissionAssignmentSummary) {
-            this.selectedPermissionAssignment = permissionAssignmentSummary;
+        openEdit(permissionAssignment) {
+            this.selectedPermissionAssignment = permissionAssignment;
             this.showEdit = true;
         },
 
-        openDelete(permissionAssignmentSummary) {
-            this.selectedPermissionAssignment = permissionAssignmentSummary;
+        openDelete(permissionAssignment) {
+            this.selectedPermissionAssignment = permissionAssignment;
             this.showDelete = true;
         },
 
@@ -83,7 +88,7 @@ export const PermissionAssignmentManager = {
 
             this.selectedPermissionAssignment = null;
 
-            await this.loadPermissionAssignmentSummaries();
+            await this.loadPermissionAssignments();
         }
     },
 
@@ -101,7 +106,7 @@ export const PermissionAssignmentManager = {
 
                     <button
                         class="btn btn-outline-secondary"
-                        @click="loadPermissionAssignmentSummaries">
+                        @click="searchPermissionAssignments">
                         🔍 搜尋
                     </button>
                 </div>
@@ -119,7 +124,7 @@ export const PermissionAssignmentManager = {
                 </thead>
 
                 <tbody>
-                    <tr v-for="u in permissionAssignmentSummaries"
+                    <tr v-for="u in permissionAssignments"
                         :key="u.accountId">
 
                         <td><strong>{{ u.username }}</strong></td>
@@ -168,7 +173,7 @@ export const PermissionAssignmentManager = {
                         </td>
                     </tr>
 
-                    <tr v-if="!permissionAssignmentSummaries.length">
+                    <tr v-if="!permissionAssignments.length">
                         <td colspan="3" class="text-center text-muted">
                             目前沒有資料
                         </td>

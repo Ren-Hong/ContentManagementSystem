@@ -35,7 +35,7 @@ namespace Cms.Infrastructure.Repositories.Role
             return count == roleIds.Count;
         }
 
-        public async Task<IEnumerable<RoleOptionEntity>> GetRoleOptionsAsync()
+        public async Task<IEnumerable<RoleLookupEntity>> ListRoleLookupsAsync()
         {
             const string sql = @"
                 SELECT
@@ -46,16 +46,16 @@ namespace Cms.Infrastructure.Repositories.Role
                 ORDER BY RoleName
             ";
 
-            return await _db.QueryAsync<RoleOptionEntity>(
+            return await _db.QueryAsync<RoleLookupEntity>(
                 sql,
                 transaction: Tx
             );
         }
 
-        public async Task<PagedResult<RoleSummaryEntity>> GetRoleSummariesPagedAsync(PageRequest preq)
+        public async Task<PagedResult<RolePermissionScopeRowEntity>> ListRolePermissionScopeRowsAsync(PageRequest pageRequest)
         {
-            var page = preq.Page <= 0 ? 1 : preq.Page;
-            var pageSize = preq.PageSize <= 0 ? 10 : preq.PageSize;
+            var page = pageRequest.Page <= 0 ? 1 : pageRequest.Page;
+            var pageSize = pageRequest.PageSize <= 0 ? 10 : pageRequest.PageSize;
             var offset = (page - 1) * pageSize;
 
             const string countSql = @"
@@ -96,7 +96,7 @@ namespace Cms.Infrastructure.Repositories.Role
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
 
-            var items = (await _db.QueryAsync<RoleSummaryEntity>(
+            var items = (await _db.QueryAsync<RolePermissionScopeRowEntity>(
                 dataSql,
                 new
                 {
@@ -105,7 +105,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 }
             )).ToList();
 
-            return new PagedResult<RoleSummaryEntity>
+            return new PagedResult<RolePermissionScopeRowEntity>
             {
                 Page = page,
                 PageSize = pageSize,
@@ -221,7 +221,7 @@ namespace Cms.Infrastructure.Repositories.Role
             );
         }
 
-        public async Task<Guid> UpdateStatusAsync(string roleName, RoleStatus status)
+        public async Task<Guid> UpdateRoleStatusAsync(string roleName, RoleStatus status)
         {
             const string sql = @"
                 UPDATE Roles

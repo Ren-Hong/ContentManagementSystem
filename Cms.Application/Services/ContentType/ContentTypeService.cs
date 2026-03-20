@@ -34,7 +34,7 @@ namespace Cms.Application.Services.ContentType
         }
 
         
-        public async Task<List<GetContentTypeOptionsResponseDto>> GetContentTypeOptionsAsync(GetContentTypeOptionsRequestDto req, Guid accountId)
+        public async Task<List<ContentTypeLookupDto>> ListContentTypeLookupsAsync(ListContentTypeLookupsRequestDto req, Guid accountId)
         {
             if (req.DepartmentId == Guid.Empty)
             {
@@ -52,10 +52,10 @@ namespace Cms.Application.Services.ContentType
                 return [];
             }
 
-            var rows = await _contentTypeRepository.GetContentTypeOptionsAsync(req.DepartmentId);
+            var rows = await _contentTypeRepository.ListContentTypeLookupsAsync(req.DepartmentId);
 
             return rows
-                .Select(x => new GetContentTypeOptionsResponseDto
+                .Select(x => new ContentTypeLookupDto
                 {
                     TypeId = x.TypeId,
                     TypeName = x.TypeName
@@ -63,7 +63,7 @@ namespace Cms.Application.Services.ContentType
                 .ToList();
         }
 
-        public async Task<List<GetContentFieldsResponseDto>> GetContentFieldsAsync(Guid typeId, Guid accountId)
+        public async Task<List<GetContentFieldsResponseDto>> ListContentFieldsAsync(Guid typeId, Guid accountId)
         {
             if (typeId == Guid.Empty)
             {
@@ -87,7 +87,7 @@ namespace Cms.Application.Services.ContentType
                 return [];
             }
 
-            var rows = await _contentTypeRepository.GetContentFieldsAsync(typeId);
+            var rows = await _contentTypeRepository.ListContentFieldsAsync(typeId);
 
             return rows
                 .Select(x => new GetContentFieldsResponseDto
@@ -323,7 +323,7 @@ namespace Cms.Application.Services.ContentType
                 };
             }
 
-            var currentFields = (await _contentTypeRepository.GetContentFieldsAsync(req.TypeId)).ToList();
+            var currentFields = (await _contentTypeRepository.ListContentFieldsAsync(req.TypeId)).ToList();
             var currentFieldIds = currentFields.Select(x => x.FieldId).ToHashSet();
             var requestedExistingFieldIds = normalizedFields
                 .Where(x => x.FieldId.HasValue)
@@ -460,7 +460,7 @@ namespace Cms.Application.Services.ContentType
                 };
             }
 
-            var fields = (await _contentTypeRepository.GetContentFieldsAsync(req.TypeId)).ToList();
+            var fields = (await _contentTypeRepository.ListContentFieldsAsync(req.TypeId)).ToList();
 
             foreach (var field in fields)
             {

@@ -1,4 +1,4 @@
-﻿import { getAccountSummaries } from '../api/accountApi.js';
+﻿import { getAccounts } from '../api/accountApi.js';
 
 import { AccountStatusText } from '../constants/accountStatus.js';
 
@@ -19,7 +19,7 @@ export const AccountManager = {
         return {
             AccountStatusText,   // 👈 關鍵在這一行
 
-            accountSummaries: [],
+            accounts: [],
 
             page: 1,
             pageSize: 10,
@@ -37,24 +37,29 @@ export const AccountManager = {
     },
 
     mounted() {
-        this.loadAccountSummaries();
+        this.loadAccounts();
     },
 
     methods: {
-        async loadAccountSummaries() {
+        async loadAccounts() {
             this.loading = true;
             try {
-                const res = await getAccountSummaries({
+                const response = await getAccounts({
                     page: this.page,
                     pageSize: this.pageSize,
                     keyword: document.getElementById('accountSearch')?.value
                 });
 
-                this.accountSummaries = res.data.items;
-                this.totalCount = res.data.totalCount;
+                this.accounts = response.data.items;
+                this.totalCount = response.data.totalCount;
             } finally {
                 this.loading = false;
             }
+        },
+
+        searchAccounts() {
+            this.page = 1;
+            this.loadAccounts();
         },
         
         changePage(p) {
@@ -64,25 +69,25 @@ export const AccountManager = {
             if (p > maxPage) return;
 
             this.page = p;
-            this.loadAccountSummaries();
+            this.loadAccounts();
         },
 
         openCreate() {
             this.showCreate = true;
         },
 
-        openEdit(accountSummary) {
-            this.selectedAccount = accountSummary;
+        openEdit(account) {
+            this.selectedAccount = account;
             this.showEdit = true;
         },
 
-        openResetPassword(accountSummary) {
-            this.selectedAccount = accountSummary;
+        openResetPassword(account) {
+            this.selectedAccount = account;
             this.showResetPassword = true;
         },
 
-        openDelete(accountSummary) {
-            this.selectedAccount = accountSummary;
+        openDelete(account) {
+            this.selectedAccount = account;
             this.showDelete = true;
         },
 
@@ -94,7 +99,7 @@ export const AccountManager = {
 
             this.selectedAccount = null;
 
-            await this.loadAccountSummaries();
+            await this.loadAccounts();
         }
     },
 
@@ -113,7 +118,7 @@ export const AccountManager = {
 
                     <button
                         class="btn btn-outline-secondary"
-                        @click="searchAccounts()">
+                        @click="searchAccounts">
                         🔍 搜尋
                     </button>
 
@@ -136,7 +141,7 @@ export const AccountManager = {
                 </thead>
                 
                 <tbody>
-                    <template v-for="a in accountSummaries" :key="a.accountId">
+                    <template v-for="a in accounts" :key="a.accountId">
 
                         <!-- 有 roleAssignments：用 rowspan 顯示 -->
                         <template v-if="a.roleAssignments && a.roleAssignments.length > 0">

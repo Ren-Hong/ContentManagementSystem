@@ -97,9 +97,9 @@ export const DynamicFormPage = {
 
             try {
 
-                const res = await getContentFields(this.contentType.typeId);
+                const response = await getContentFields(this.contentType.typeId);
 
-                this.fields = res.data || [];
+                this.fields = response.data || [];
                 this.resetFieldValues();
 
             } finally {
@@ -117,9 +117,9 @@ export const DynamicFormPage = {
 
             try {
 
-                const res = await getContents(this.contentType.typeId);
+                const response = await getContents(this.contentType.typeId);
 
-                this.contents = res.data || [];
+                this.contents = response.data || [];
                 this.syncSelectedContent();
 
             } finally {

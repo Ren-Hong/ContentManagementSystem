@@ -5,9 +5,9 @@ namespace Cms.Contract.Repositories.ContentType.Interfaces
 {
     public interface IContentTypeRepository
     {
-        Task<IEnumerable<ContentTypeOptionEntity>> GetContentTypeOptionsAsync(Guid departmentId);
+        Task<IEnumerable<ContentTypeLookupEntity>> ListContentTypeLookupsAsync(Guid departmentId);
 
-        Task<IEnumerable<ContentFieldEntity>> GetContentFieldsAsync(Guid typeId);
+        Task<IEnumerable<ContentFieldEntity>> ListContentFieldsAsync(Guid typeId);
 
         Task<bool> TypeNameExistsAsync(Guid departmentId, string typeName);
 
