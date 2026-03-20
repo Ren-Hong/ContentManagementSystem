@@ -62,7 +62,9 @@ export const AccountResetPasswordModal = {
             this.submitting = true;
 
             try {
-                let res = await resetPassword(this.form);
+                let res = await resetPassword(this.account.username, {
+                    password: this.form.password
+                });
 
                 if (!res.success) {
                     alert(`錯誤代碼 -> ${res.errorCode}`);

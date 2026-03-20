@@ -87,7 +87,7 @@
 
     //登入Api
     async function login(username, password) {
-        let res = await fetch('/api/account/login', {
+        let res = await fetch('/api/sessions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

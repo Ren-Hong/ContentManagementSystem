@@ -178,8 +178,7 @@ export const DynamicFormPage = {
             this.savingContent = true;
 
             try {
-                const response = await updateContent({
-                    contentId: this.selectedContent.contentId,
+                const response = await updateContent(this.selectedContent.contentId, {
                     revisionId: this.selectedContent.revisionId,
                     fieldValues: this.selectedContent.fieldValues.map(field => ({
                         fieldId: field.fieldId,
@@ -214,9 +213,7 @@ export const DynamicFormPage = {
             this.deletingContent = true;
 
             try {
-                const response = await deleteContent({
-                    contentId: this.selectedContent.contentId
-                });
+                const response = await deleteContent(this.selectedContent.contentId);
 
                 if (!response.success) {
                     alert(this.resolveContentErrorMessage(response.errorCode, '刪除表單內容失敗'));
@@ -253,8 +250,7 @@ export const DynamicFormPage = {
             this.submitting = true;
 
             try {
-                const response = await createContent({
-                    typeId: this.contentType.typeId,
+                const response = await createContent(this.contentType.typeId, {
                     fieldValues: this.fields.map(field => ({
                         fieldId: field.fieldId,
                         fieldValue: this.fieldValues[field.fieldId] == null

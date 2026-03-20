@@ -1,17 +1,17 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Cms.Contract.Controllers.Api;
-using Cms.Contract.Services.ContentType.Interfaces;
 using Cms.Contract.Controllers.ContentType.Models;
 using Cms.Contract.Services.ContentType.Dtos;
+using Cms.Contract.Services.ContentType.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Cms.Web.Controllers.ContentType
 {
     [ApiController]
-    [Route("api/contenttype")]
+    [Route("api/content-types")]
     [Authorize]
-    public class ContentTypeController : Controller
+    public class ContentTypeController : ControllerBase
     {
         private readonly IContentTypeService _contentTypeService;
 
@@ -21,8 +21,8 @@ namespace Cms.Web.Controllers.ContentType
         }
 
         [Authorize(Policy = "Permission.Content.View")]
-        [HttpPost("options")]
-        public async Task<IActionResult> GetContentTypeOptions([FromBody] GetContentTypeOptionsRequestModel req)
+        [HttpGet]
+        public async Task<IActionResult> GetContentTypeOptions([FromQuery] GetContentTypeOptionsRequestModel req)
         {
             var dto = new GetContentTypeOptionsRequestDto
             {
@@ -37,28 +37,19 @@ namespace Cms.Web.Controllers.ContentType
                 TypeName = x.TypeName
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetContentTypeOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetContentTypeOptionsResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateContentType([FromBody] CreateContentTypeRequestModel req)
         {
             if (!ModelState.IsValid)
             {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
+                return ValidationErrorResponse();
             }
 
             var rdto = await _contentTypeService.CreateContentTypeAsync(
@@ -77,19 +68,19 @@ namespace Cms.Web.Controllers.ContentType
                 }
             );
 
-            return Json(new ApiResponse<CreateContentTypeResponseModel>
+            if (rdto.Result != CreateContentTypeResult.Success)
             {
-                Success = rdto.Result == CreateContentTypeResult.Success,
-                ErrorCode = rdto.Result != CreateContentTypeResult.Success
-                    ? rdto.Result.ToString()
-                    : null,
-                Data = rdto.Result == CreateContentTypeResult.Success
-                    ? new CreateContentTypeResponseModel
-                    {
-                        TypeId = rdto.TypeId!.Value,
-                        TypeName = rdto.TypeName!
-                    }
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Created($"/api/content-types/{rdto.TypeId}", new ApiResponse<CreateContentTypeResponseModel>
+            {
+                Success = true,
+                Data = new CreateContentTypeResponseModel
+                {
+                    TypeId = rdto.TypeId!.Value,
+                    TypeName = rdto.TypeName!
+                }
             });
         }
 
@@ -108,43 +99,25 @@ namespace Cms.Web.Controllers.ContentType
                 IsRequired = x.IsRequired
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetContentFieldsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetContentFieldsResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
 
-        private Guid GetCurrentAccountId()
-        {
-            var ownerClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            return Guid.TryParse(ownerClaim, out var accountId)
-                ? accountId
-                : Guid.Empty;
-        }
-
-        [HttpPost("update")]
-        public async Task<IActionResult> UpdateContentType([FromBody] UpdateContentTypeRequestModel req)
+        [HttpPut("{typeId:guid}")]
+        public async Task<IActionResult> UpdateContentType(Guid typeId, [FromBody] UpdateContentTypeBodyModel req)
         {
             if (!ModelState.IsValid)
             {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
+                return ValidationErrorResponse();
             }
 
             var rdto = await _contentTypeService.UpdateContentTypeAsync(
                 new UpdateContentTypeRequestDto
                 {
-                    TypeId = req.TypeId,
+                    TypeId = typeId,
                     TypeName = req.TypeName,
                     Fields = req.Fields
                         .Select(x => new UpdateContentTypeFieldDto
@@ -158,46 +131,91 @@ namespace Cms.Web.Controllers.ContentType
                 }
             );
 
-            return Json(new ApiResponse
+            if (rdto.Result != UpdateContentTypeResult.Success)
             {
-                Success = rdto.Result == UpdateContentTypeResult.Success,
-                ErrorCode = rdto.Result != UpdateContentTypeResult.Success
-                    ? rdto.Result.ToString()
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
         }
 
-        [HttpPost("delete")]
-        public async Task<IActionResult> DeleteContentType([FromBody] DeleteContentTypeRequestModel req)
+        [HttpDelete("{typeId:guid}")]
+        public async Task<IActionResult> DeleteContentType(Guid typeId)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
-            }
-
             var rdto = await _contentTypeService.DeleteContentTypeAsync(
                 new DeleteContentTypeRequestDto
                 {
-                    TypeId = req.TypeId
+                    TypeId = typeId
                 }
             );
 
-            return Json(new ApiResponse
+            if (rdto.Result != DeleteContentTypeResult.Success)
             {
-                Success = rdto.Result == DeleteContentTypeResult.Success,
-                ErrorCode = rdto.Result != DeleteContentTypeResult.Success
-                    ? rdto.Result.ToString()
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
+        }
+
+        private Guid GetCurrentAccountId()
+        {
+            var ownerClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return Guid.TryParse(ownerClaim, out var accountId)
+                ? accountId
+                : Guid.Empty;
+        }
+
+        private IActionResult ValidationErrorResponse()
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                ValidationErrors = ModelState
+                    .Where(entry => entry.Value!.Errors.Any())
+                    .ToDictionary(
+                        entry => entry.Key,
+                        entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToList()
+                    )
+            });
+        }
+
+        private IActionResult ErrorResponse(string errorCode)
+        {
+            return StatusCode(MapStatusCode(errorCode), new ApiResponse
+            {
+                Success = false,
+                ErrorCode = errorCode
+            });
+        }
+
+        private static int MapStatusCode(string errorCode)
+        {
+            if (errorCode.Contains("PermissionDenied", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status403Forbidden;
+            }
+
+            if (errorCode.Contains("NotFound", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status404NotFound;
+            }
+
+            if (
+                errorCode.Contains("Required", StringComparison.Ordinal)
+                || errorCode.Contains("Invalid", StringComparison.Ordinal)
+            )
+            {
+                return StatusCodes.Status400BadRequest;
+            }
+
+            return StatusCodes.Status409Conflict;
         }
     }
 }

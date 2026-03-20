@@ -1,7 +1,5 @@
 ﻿export async function getPermissionOptions() {
-    return await fetch('api/permission/options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
+    return await fetch('/api/permissions', {
+        method: 'GET'
     }).then(r => r.json());
 }

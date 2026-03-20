@@ -157,7 +157,10 @@ export const RoleEditModal = {
             this.submitting = true;
 
             try {
-                let res = await updateRole(this.form);
+                let res = await updateRole(this.role.roleName, {
+                    permissionScopes: this.form.permissionScopes,
+                    status: this.form.status
+                });
 
                 if (!res.success) {
                     alert(`錯誤代碼 -> ${res.errorCode}`);

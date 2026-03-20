@@ -1,6 +1,6 @@
 using Cms.Contract.Controllers.Api;
-using Cms.Contract.Services.Department.Interfaces;
 using Cms.Contract.Controllers.Department.Models;
+using Cms.Contract.Services.Department.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -8,20 +8,18 @@ using System.Security.Claims;
 namespace Cms.Web.Controllers.Department
 {
     [ApiController]
-    [Route("api/department")]
+    [Route("api/departments")]
     [Authorize]
-    public class DepartmentController : Controller
+    public class DepartmentController : ControllerBase
     {
         private readonly IDepartmentService _departmentService;
 
-        public DepartmentController(
-            IDepartmentService departmentService
-        )
+        public DepartmentController(IDepartmentService departmentService)
         {
             _departmentService = departmentService;
         }
 
-        [HttpPost("options")]
+        [HttpGet]
         public async Task<IActionResult> GetDepartmentOptions()
         {
             var rdto = await _departmentService.GetDepartmentOptionsAsync();
@@ -32,14 +30,14 @@ namespace Cms.Web.Controllers.Department
                 DepartmentId = x.DepartmentId,
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetDepartmentOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetDepartmentOptionsResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
 
-        [HttpPost("sidebar")]
+        [HttpGet("sidebar")]
         [Authorize(Policy = "Permission.Content.View")]
         public async Task<IActionResult> GetDepartmentsForSidebar()
         {
@@ -52,7 +50,7 @@ namespace Cms.Web.Controllers.Department
                 DepartmentCode = x.DepartmentCode,
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetDepartmentsForSidebarResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetDepartmentsForSidebarResponseModel>>
             {
                 Success = true,
                 Data = res

@@ -1,5 +1,5 @@
-export async function createContent(payload) {
-    return await fetch('/api/content/create', {
+export async function createContent(typeId, payload) {
+    return await fetch(`/api/content-types/${typeId}/contents`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -7,24 +7,22 @@ export async function createContent(payload) {
 }
 
 export async function getContents(typeId) {
-    return await fetch(`/api/content/${typeId}`, {
+    return await fetch(`/api/content-types/${typeId}/contents`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     }).then(response => response.json());
 }
 
-export async function updateContent(payload) {
-    return await fetch('/api/content/update', {
-        method: 'POST',
+export async function updateContent(contentId, payload) {
+    return await fetch(`/api/contents/${contentId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     }).then(response => response.json());
 }
 
-export async function deleteContent(payload) {
-    return await fetch('/api/content/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+export async function deleteContent(contentId) {
+    return await fetch(`/api/contents/${contentId}`, {
+        method: 'DELETE'
     }).then(response => response.json());
 }

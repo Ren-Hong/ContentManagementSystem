@@ -144,7 +144,10 @@ export const AccountEditModal = {
             this.submitting = true;
 
             try {
-                let res = await updateAccount(this.form);
+                let res = await updateAccount(this.account.username, {
+                    roleAssignments: this.form.roleAssignments,
+                    status: this.form.status
+                });
 
                 if (!res.success) {
                     alert(`錯誤代碼 -> ${res.errorCode}`);

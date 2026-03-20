@@ -1,31 +1,40 @@
+function buildQueryString(payload) {
+    const params = new URLSearchParams();
+
+    Object.entries(payload || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+            params.set(key, value);
+        }
+    });
+
+    const query = params.toString();
+    return query ? `?${query}` : '';
+}
+
 export async function getContentTypeOptions(payload) {
-    return await fetch('/api/contenttype/options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    return await fetch(`/api/content-types${buildQueryString(payload)}`, {
+        method: 'GET'
     }).then(r => r.json());
 }
 
 export async function createContentType(payload) {
-    return await fetch('/api/contenttype/create', {
+    return await fetch('/api/content-types', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     }).then(r => r.json());
 }
 
-export async function updateContentType(payload) {
-    return await fetch('/api/contenttype/update', {
-        method: 'POST',
+export async function updateContentType(typeId, payload) {
+    return await fetch(`/api/content-types/${typeId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     }).then(r => r.json());
 }
 
-export async function deleteContentType(payload) {
-    return await fetch('/api/contenttype/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+export async function deleteContentType(typeId) {
+    return await fetch(`/api/content-types/${typeId}`, {
+        method: 'DELETE'
     }).then(r => r.json());
 }

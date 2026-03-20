@@ -58,7 +58,7 @@ export const AccountDeleteModal = {
             this.submitting = true;
 
             try {
-                let res = await deleteAccount(this.form);
+                let res = await deleteAccount(this.account.username);
 
                 if (!res.success) {
                     alert(`錯誤代碼 -> ${res.errorCode}`);
@@ -122,4 +122,3 @@ export const AccountDeleteModal = {
         </div>
     `
 };
-

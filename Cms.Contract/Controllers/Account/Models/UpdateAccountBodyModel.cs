@@ -1,0 +1,14 @@
+﻿using Cms.Contract.Repositories.Account.Persistence;
+using System.ComponentModel.DataAnnotations;
+
+namespace Cms.Contract.Controllers.Account.Models
+{
+    public class UpdateAccountBodyModel
+    {
+        [Required(ErrorMessage = "請選擇角色部門指派")]
+        public required List<AccountRoleAssignmentRequestModel> RoleAssignments { get; set; }
+
+        [Required(ErrorMessage = "請選擇狀態")]
+        public AccountStatus Status { get; set; }
+    }
+}

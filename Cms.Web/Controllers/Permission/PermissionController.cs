@@ -1,26 +1,24 @@
 ﻿using Cms.Contract.Controllers.Api;
-using Cms.Contract.Services.Permission.Interfaces;
 using Cms.Contract.Controllers.Permission.Models;
+using Cms.Contract.Services.Permission.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cms.Web.Controllers.Permission
 {
     [ApiController]
-    [Route("api/permission")]
+    [Route("api/permissions")]
     [Authorize(Roles = "Admin")]
-    public class PermissionController : Controller
+    public class PermissionController : ControllerBase
     {
         private readonly IPermissionService _permissionService;
 
-        public PermissionController(
-            IPermissionService permissionService
-        )
+        public PermissionController(IPermissionService permissionService)
         {
             _permissionService = permissionService;
         }
 
-        [HttpPost("options")]
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPermissionOptions()
         {
@@ -32,7 +30,7 @@ namespace Cms.Web.Controllers.Permission
                 PermissionId = x.PermissionId,
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetPermissionOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetPermissionOptionsResponseModel>>
             {
                 Success = true,
                 Data = res

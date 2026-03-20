@@ -1,30 +1,27 @@
 using Cms.Contract.Common.Pagination;
 using Cms.Contract.Controllers.Api;
-
+using Cms.Contract.Controllers.PermissionAssignment.Models;
 using Cms.Contract.Services.PermissionAssignment.Dtos;
 using Cms.Contract.Services.PermissionAssignment.Interfaces;
-using Cms.Contract.Controllers.PermissionAssignment.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cms.Web.Controllers.PermissionAssignment
 {
     [ApiController]
-    [Route("api/permissionAssignment")]
+    [Route("api/permission-assignments")]
     [Authorize(Roles = "Admin")]
-    public class PermissionAssignmentController : Controller
+    public class PermissionAssignmentController : ControllerBase
     {
         private readonly IPermissionAssignmentService _permissionAssignmentService;
 
-        public PermissionAssignmentController(
-            IPermissionAssignmentService permissionAssignmentService
-        )
+        public PermissionAssignmentController(IPermissionAssignmentService permissionAssignmentService)
         {
             _permissionAssignmentService = permissionAssignmentService;
         }
 
-        [HttpPost("summaries")]
-        public async Task<IActionResult> GetPermissionAssignmentSummaries([FromBody] PageRequest req)
+        [HttpGet]
+        public async Task<IActionResult> GetPermissionAssignmentSummaries([FromQuery] PageRequest req)
         {
             var paged = await _permissionAssignmentService.GetPermissionAssignmentSummariesAsync(req);
 
@@ -33,13 +30,11 @@ namespace Cms.Web.Controllers.PermissionAssignment
                 {
                     AccountId = x.AccountId,
                     Username = x.Username,
-
                     PermissionDepartments = x.PermissionDepartments?
                         .Select(p => new PermissionDepartmentsSummaryResponseModel
                         {
                             PermissionId = p.PermissionId,
                             PermissionName = p.PermissionName,
-
                             Departments = p.Departments?
                                 .Select(d => new DepartmentSummaryResponseModel
                                 {
@@ -49,13 +44,12 @@ namespace Cms.Web.Controllers.PermissionAssignment
                                     ValidTo = d.ValidTo
                                 })
                                 .ToList()
-
                         })
                         .ToList()
                 })
                 .ToList();
 
-            return Json(new ApiResponse<PagedResult<GetPermissionAssignmentSummariesResponseModel>>
+            return Ok(new ApiResponse<PagedResult<GetPermissionAssignmentSummariesResponseModel>>
             {
                 Success = true,
                 Data = new PagedResult<GetPermissionAssignmentSummariesResponseModel>

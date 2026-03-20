@@ -111,8 +111,7 @@ export const ContentTypeEditModal = {
             this.submitting = true;
 
             try {
-                const res = await updateContentType({
-                    typeId: this.form.typeId,
+                const res = await updateContentType(this.form.typeId, {
                     typeName: this.form.typeName.trim(),
                     fields: this.form.fields.map(x => ({
                         fieldId: x.fieldId,

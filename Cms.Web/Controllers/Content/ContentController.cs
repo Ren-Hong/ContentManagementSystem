@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Cms.Web.Controllers.Content
 {
     [ApiController]
-    [Route("api/content")]
+    [Route("api")]
     [Authorize]
-    public class ContentController : Controller
+    public class ContentController : ControllerBase
     {
         private readonly IContentService _contentService;
 
@@ -21,12 +21,12 @@ namespace Cms.Web.Controllers.Content
         }
 
         [Authorize(Policy = "Permission.Content.View")]
-        [HttpGet("{typeId:guid}")]
+        [HttpGet("content-types/{typeId:guid}/contents")]
         public async Task<IActionResult> GetContents(Guid typeId)
         {
             var serviceResponse = await _contentService.GetContentsAsync(typeId, GetCurrentAccountId());
 
-            return Json(new ApiResponse<IEnumerable<GetContentsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetContentsResponseModel>>
             {
                 Success = true,
                 Data = serviceResponse.Select(content => new GetContentsResponseModel
@@ -51,12 +51,12 @@ namespace Cms.Web.Controllers.Content
         }
 
         [Authorize(Policy = "Permission.Content.Create")]
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateContent([FromBody] CreateContentRequestModel requestModel)
+        [HttpPost("content-types/{typeId:guid}/contents")]
+        public async Task<IActionResult> CreateContent(Guid typeId, [FromBody] CreateContentBodyModel requestModel)
         {
             if (!ModelState.IsValid)
             {
-                return Json(BuildValidationErrorResponse());
+                return ValidationErrorResponse();
             }
 
             var ownerClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -67,7 +67,7 @@ namespace Cms.Web.Controllers.Content
             var serviceResponse = await _contentService.CreateContentAsync(
                 new CreateContentRequestDto
                 {
-                    TypeId = requestModel.TypeId,
+                    TypeId = typeId,
                     OwnerId = ownerId,
                     FieldValues = requestModel.FieldValues
                         .Select(fieldValue => new CreateContentFieldValueDto
@@ -79,35 +79,35 @@ namespace Cms.Web.Controllers.Content
                 }
             );
 
-            return Json(new ApiResponse<CreateContentResponseModel>
+            if (serviceResponse.Result != CreateContentResult.Success)
             {
-                Success = serviceResponse.Result == CreateContentResult.Success,
-                ErrorCode = serviceResponse.Result != CreateContentResult.Success
-                    ? serviceResponse.Result.ToString()
-                    : null,
-                Data = serviceResponse.Result == CreateContentResult.Success
-                    ? new CreateContentResponseModel
-                    {
-                        ContentId = serviceResponse.ContentId!.Value,
-                        RevisionId = serviceResponse.RevisionId!.Value
-                    }
-                    : null
+                return ErrorResponse(serviceResponse.Result.ToString());
+            }
+
+            return Created($"/api/contents/{serviceResponse.ContentId}", new ApiResponse<CreateContentResponseModel>
+            {
+                Success = true,
+                Data = new CreateContentResponseModel
+                {
+                    ContentId = serviceResponse.ContentId!.Value,
+                    RevisionId = serviceResponse.RevisionId!.Value
+                }
             });
         }
 
         [Authorize(Policy = "Permission.Content.Edit")]
-        [HttpPost("update")]
-        public async Task<IActionResult> UpdateContent([FromBody] UpdateContentRequestModel requestModel)
+        [HttpPut("contents/{contentId:guid}")]
+        public async Task<IActionResult> UpdateContent(Guid contentId, [FromBody] UpdateContentBodyModel requestModel)
         {
             if (!ModelState.IsValid)
             {
-                return Json(BuildValidationErrorResponse());
+                return ValidationErrorResponse();
             }
 
             var serviceResponse = await _contentService.UpdateContentAsync(
                 new UpdateContentRequestDto
                 {
-                    ContentId = requestModel.ContentId,
+                    ContentId = contentId,
                     RevisionId = requestModel.RevisionId,
                     FieldValues = requestModel.FieldValues
                         .Select(fieldValue => new UpdateContentFieldValueDto
@@ -120,44 +120,43 @@ namespace Cms.Web.Controllers.Content
                 GetCurrentAccountId()
             );
 
-            return Json(new ApiResponse
+            if (serviceResponse.Result != UpdateContentResult.Success)
             {
-                Success = serviceResponse.Result == UpdateContentResult.Success,
-                ErrorCode = serviceResponse.Result != UpdateContentResult.Success
-                    ? serviceResponse.Result.ToString()
-                    : null
+                return ErrorResponse(serviceResponse.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
         }
 
         [Authorize(Policy = "Permission.Content.Delete")]
-        [HttpPost("delete")]
-        public async Task<IActionResult> DeleteContent([FromBody] DeleteContentRequestModel requestModel)
+        [HttpDelete("contents/{contentId:guid}")]
+        public async Task<IActionResult> DeleteContent(Guid contentId)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(BuildValidationErrorResponse());
-            }
-
             var serviceResponse = await _contentService.DeleteContentAsync(
                 new DeleteContentRequestDto
                 {
-                    ContentId = requestModel.ContentId
+                    ContentId = contentId
                 },
                 GetCurrentAccountId()
             );
 
-            return Json(new ApiResponse
+            if (serviceResponse.Result != DeleteContentResult.Success)
             {
-                Success = serviceResponse.Result == DeleteContentResult.Success,
-                ErrorCode = serviceResponse.Result != DeleteContentResult.Success
-                    ? serviceResponse.Result.ToString()
-                    : null
+                return ErrorResponse(serviceResponse.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
         }
 
-        private ApiResponse BuildValidationErrorResponse()
+        private IActionResult ValidationErrorResponse()
         {
-            return new ApiResponse
+            return BadRequest(new ApiResponse
             {
                 Success = false,
                 ValidationErrors = ModelState
@@ -166,7 +165,39 @@ namespace Cms.Web.Controllers.Content
                         entry => entry.Key,
                         entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToList()
                     )
-            };
+            });
+        }
+
+        private IActionResult ErrorResponse(string errorCode)
+        {
+            return StatusCode(MapStatusCode(errorCode), new ApiResponse
+            {
+                Success = false,
+                ErrorCode = errorCode
+            });
+        }
+
+        private static int MapStatusCode(string errorCode)
+        {
+            if (errorCode.Contains("PermissionDenied", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status403Forbidden;
+            }
+
+            if (errorCode.Contains("NotFound", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status404NotFound;
+            }
+
+            if (
+                errorCode.Contains("Required", StringComparison.Ordinal)
+                || errorCode.Contains("Invalid", StringComparison.Ordinal)
+            )
+            {
+                return StatusCodes.Status400BadRequest;
+            }
+
+            return StatusCodes.Status409Conflict;
         }
 
         private Guid GetCurrentAccountId()

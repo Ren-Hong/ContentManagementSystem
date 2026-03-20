@@ -1,28 +1,26 @@
 ﻿using Cms.Contract.Common.Pagination;
 using Cms.Contract.Controllers.Api;
+using Cms.Contract.Controllers.Role.Models;
 using Cms.Contract.Services.Role.Dtos;
 using Cms.Contract.Services.Role.Interfaces;
-using Cms.Contract.Controllers.Role.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cms.Web.Controllers.Role
 {
     [ApiController]
-    [Route("api/role")]
+    [Route("api/roles")]
     [Authorize(Roles = "Admin")]
-    public class RoleController : Controller
+    public class RoleController : ControllerBase
     {
         private readonly IRoleService _roleService;
 
-        public RoleController(
-            IRoleService roleService
-        )
+        public RoleController(IRoleService roleService)
         {
             _roleService = roleService;
         }
 
-        [HttpPost("options")]
+        [HttpGet("options")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetRoleOptions()
         {
@@ -34,15 +32,15 @@ namespace Cms.Web.Controllers.Role
                 RoleId = x.RoleId,
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetRoleOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetRoleOptionsResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
 
-        [HttpPost("summaries")]
-        public async Task<IActionResult> GetRoleSummaries([FromBody] PageRequest req)
+        [HttpGet]
+        public async Task<IActionResult> GetRoleSummaries([FromQuery] PageRequest req)
         {
             var rdto = await _roleService.GetRoleSummariesAsync(req);
 
@@ -51,19 +49,16 @@ namespace Cms.Web.Controllers.Role
                 Page = rdto.Page,
                 PageSize = rdto.PageSize,
                 TotalCount = rdto.TotalCount,
-
                 Items = rdto.Items.Select(x => new GetRoleSummariesResponseModel
                 {
                     RoleId = x.RoleId,
                     RoleName = x.RoleName,
                     Status = x.Status,
-
                     PermissionScopes = x.PermissionScopes
                         .Select(p => new PermissionScopesSummaryModel
                         {
                             PermissionId = p.PermissionId,
                             PermissionName = p.PermissionName,
-
                             Scopes = p.Scopes
                                 .Select(s => new ScopeSummaryModel
                                 {
@@ -71,34 +66,24 @@ namespace Cms.Web.Controllers.Role
                                     ScopeName = s.ScopeName
                                 })
                                 .ToList()
-
                         })
                         .ToList()
                 }).ToList()
             };
 
-            return Json(new ApiResponse<PagedResult<GetRoleSummariesResponseModel>>
+            return Ok(new ApiResponse<PagedResult<GetRoleSummariesResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequestModel req)
         {
             if (!ModelState.IsValid)
             {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
+                return ValidationErrorResponse();
             }
 
             var rdto = await _roleService.CreateRoleAsync(
@@ -106,7 +91,6 @@ namespace Cms.Web.Controllers.Role
                 {
                     RoleName = req.RoleName,
                     RoleCode = req.RoleCode,
-
                     PermissionScopes = req.PermissionScopes
                         .Select(x => new PermissionScopeDto
                         {
@@ -117,37 +101,29 @@ namespace Cms.Web.Controllers.Role
                 }
             );
 
-            return Json(new ApiResponse
+            if (rdto.Result != CreateRoleResult.Success)
             {
-                Success = rdto.Result == CreateRoleResult.Success,
-                ErrorCode = rdto.Result != CreateRoleResult.Success
-                    ? rdto.Result.ToString() // 這邊要ToString喔, 不然前端會拿到魔法數字
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Created($"/api/roles/{Uri.EscapeDataString(req.RoleName)}", new ApiResponse
+            {
+                Success = true
             });
         }
 
-        [HttpPost("update")]
-        public async Task<IActionResult> UpdateRole([FromBody] UpdateRoleRequestModel req)
+        [HttpPut("{roleName}")]
+        public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleBodyModel req)
         {
             if (!ModelState.IsValid)
             {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
+                return ValidationErrorResponse();
             }
 
             var rdto = await _roleService.UpdateRoleAsync(
                 new UpdateRoleRequestDto
                 {
-                    RoleName = req.RoleName,
-
+                    RoleName = roleName,
                     PermissionScopes = req.PermissionScopes
                         .Select(x => new PermissionScopeDto
                         {
@@ -155,52 +131,86 @@ namespace Cms.Web.Controllers.Role
                             ScopeId = x.ScopeId
                         })
                         .ToList(),
-
                     Status = req.Status,
                 }
             );
 
-            return Json(new ApiResponse
+            if (rdto.Result != UpdateRoleResult.Success)
             {
-                Success = rdto.Result == UpdateRoleResult.Success,
-                ErrorCode = rdto.Result != UpdateRoleResult.Success
-                    ? rdto.Result.ToString()
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
         }
 
-        [HttpPost("delete")]
-        public async Task<IActionResult> DeleteRole([FromBody] DeleteRoleRequestModel req)
+        [HttpDelete("{roleName}")]
+        public async Task<IActionResult> DeleteRole(string roleName)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new ApiResponse
-                {
-                    Success = false,
-                    ValidationErrors = ModelState
-                        .Where(x => x.Value!.Errors.Any())
-                        .ToDictionary(
-                            x => x.Key,
-                            x => x.Value!.Errors.Select(e => e.ErrorMessage).ToList()
-                        )
-                });
-            }
-
             var rdto = await _roleService.DeleteRoleAsync(
                 new DeleteRoleRequestDto
                 {
-                    RoleName = req.RoleName,
+                    RoleName = roleName,
                 }
             );
 
-            return Json(new ApiResponse
+            if (rdto.Result != DeleteRoleResult.Success)
             {
-                Success = rdto.Result == DeleteRoleResult.Success,
-                ErrorCode = rdto.Result != DeleteRoleResult.Success
-                    ? rdto.Result.ToString()
-                    : null
+                return ErrorResponse(rdto.Result.ToString());
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true
             });
         }
 
+        private IActionResult ValidationErrorResponse()
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                ValidationErrors = ModelState
+                    .Where(entry => entry.Value!.Errors.Any())
+                    .ToDictionary(
+                        entry => entry.Key,
+                        entry => entry.Value!.Errors.Select(error => error.ErrorMessage).ToList()
+                    )
+            });
+        }
+
+        private IActionResult ErrorResponse(string errorCode)
+        {
+            return StatusCode(MapStatusCode(errorCode), new ApiResponse
+            {
+                Success = false,
+                ErrorCode = errorCode
+            });
+        }
+
+        private static int MapStatusCode(string errorCode)
+        {
+            if (errorCode.Contains("PermissionDenied", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status403Forbidden;
+            }
+
+            if (errorCode.Contains("NotFound", StringComparison.Ordinal))
+            {
+                return StatusCodes.Status404NotFound;
+            }
+
+            if (
+                errorCode.Contains("Required", StringComparison.Ordinal)
+                || errorCode.Contains("Invalid", StringComparison.Ordinal)
+            )
+            {
+                return StatusCodes.Status400BadRequest;
+            }
+
+            return StatusCodes.Status409Conflict;
+        }
     }
 }

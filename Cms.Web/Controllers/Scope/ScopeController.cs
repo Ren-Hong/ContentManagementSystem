@@ -1,17 +1,16 @@
-﻿using Cms.Contract.Services.Scope.Dtos;
-using Cms.Contract.Services.Scope.Interfaces;
-using Cms.Contract.Controllers.Api;
-using Cms.Contract.Controllers.Role.Models;
+﻿using Cms.Contract.Controllers.Api;
 using Cms.Contract.Controllers.Scope.Models;
+using Cms.Contract.Services.Scope.Dtos;
+using Cms.Contract.Services.Scope.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cms.Web.Controllers.Scope
 {
     [ApiController]
-    [Route("api/scope")]
+    [Route("api/scopes")]
     [Authorize(Roles = "Admin")]
-    public class ScopeController : Controller
+    public class ScopeController : ControllerBase
     {
         private readonly IScopeService _scopeService;
 
@@ -20,7 +19,7 @@ namespace Cms.Web.Controllers.Scope
             _scopeService = scopeService;
         }
 
-        [HttpPost("options")]
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetScopeOptions()
         {
@@ -33,13 +32,11 @@ namespace Cms.Web.Controllers.Scope
                 ScopeId = x.ScopeId,
             }).ToList();
 
-            return Json(new ApiResponse<IEnumerable<GetScopeOptionsResponseModel>>
+            return Ok(new ApiResponse<IEnumerable<GetScopeOptionsResponseModel>>
             {
                 Success = true,
                 Data = res
             });
         }
-
     }
 }
-
