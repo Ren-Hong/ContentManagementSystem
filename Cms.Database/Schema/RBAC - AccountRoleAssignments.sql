@@ -1,40 +1,38 @@
-﻿CREATE TABLE dbo.AccountRoleAssignments
+CREATE TABLE AccountRoleAssignments
 (
-    AccountId UNIQUEIDENTIFIER NOT NULL,
+    AccountId RAW(16) NOT NULL,
 
-    RoleId    UNIQUEIDENTIFIER NOT NULL,
+    RoleId RAW(16) NOT NULL,
 
-    DepartmentId UNIQUEIDENTIFIER NOT NULL,
+    DepartmentId RAW(16) NOT NULL,
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_AccountRoles_CreatedAt
-        DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
     CONSTRAINT PK_AccountRolesAssignments
         PRIMARY KEY (AccountId, RoleId),
 
     CONSTRAINT FK_AccountRolesAssignments_Accounts
         FOREIGN KEY (AccountId)
-        REFERENCES dbo.Accounts(AccountId)
+        REFERENCES Accounts(AccountId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_AccountRolesAssignments_Roles
         FOREIGN KEY (RoleId)
-        REFERENCES dbo.Roles(RoleId)
+        REFERENCES Roles(RoleId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_AccountRolesAssignments_Departments
         FOREIGN KEY (DepartmentId)
-        REFERENCES dbo.Departments(DepartmentId)
+        REFERENCES Departments(DepartmentId)
         ON DELETE CASCADE
 );
 
-INSERT INTO dbo.AccountRoleAssignments (AccountId, RoleId, DepartmentId)
+INSERT INTO AccountRoleAssignments (AccountId, RoleId, DepartmentId)
 SELECT
     a.AccountId,
     r.RoleId,
     d.DepartmentId
-FROM dbo.Accounts a
-JOIN dbo.Roles r ON r.RoleCode = N'Admin'
-JOIN dbo.Departments d ON d.DepartmentCode = N'IT'
-WHERE a.Username = N'admin';
+FROM Accounts a
+JOIN Roles r ON r.RoleCode = 'Admin'
+JOIN Departments d ON d.DepartmentCode = 'IT'
+WHERE a.Username = 'admin';

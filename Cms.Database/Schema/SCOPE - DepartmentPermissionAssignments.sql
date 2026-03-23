@@ -1,35 +1,33 @@
-CREATE TABLE dbo.DepartmentPermissionAssignments
+CREATE TABLE DepartmentPermissionAssignments
 (
-    AccountId UNIQUEIDENTIFIER NOT NULL,
-    PermissionId UNIQUEIDENTIFIER NOT NULL,
-    DepartmentId UNIQUEIDENTIFIER NOT NULL,
+    AccountId RAW(16) NOT NULL,
+    PermissionId RAW(16) NOT NULL,
+    DepartmentId RAW(16) NOT NULL,
 
-    ValidFrom DATETIME2(0) NOT NULL
-        CONSTRAINT DF_DPA_ValidFrom DEFAULT SYSUTCDATETIME(),
+    ValidFrom TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
-    ValidTo DATETIME2(0) NULL,
+    ValidTo TIMESTAMP(0) NULL,
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_DPA_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
     CONSTRAINT PK_DepartmentPermissionAssignments
         PRIMARY KEY (AccountId, DepartmentId, PermissionId),
 
     CONSTRAINT FK_DPA_Accounts
         FOREIGN KEY (AccountId)
-        REFERENCES dbo.Accounts(AccountId)
+        REFERENCES Accounts(AccountId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_DPA_Departments
         FOREIGN KEY (DepartmentId)
-        REFERENCES dbo.Departments(DepartmentId)
+        REFERENCES Departments(DepartmentId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_DPA_Permissions
         FOREIGN KEY (PermissionId)
-        REFERENCES dbo.Permissions(PermissionId)
+        REFERENCES Permissions(PermissionId)
         ON DELETE CASCADE
 );
 
 CREATE INDEX IX_DPA_Department_Permission
-ON dbo.DepartmentPermissionAssignments (DepartmentId, PermissionId);
+ON DepartmentPermissionAssignments (DepartmentId, PermissionId);

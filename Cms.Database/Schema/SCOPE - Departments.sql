@@ -1,19 +1,15 @@
-CREATE TABLE dbo.Departments
+CREATE TABLE Departments
 (
-    DepartmentId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_Departments_DepartmentId
-        DEFAULT NEWSEQUENTIALID(),
+    DepartmentId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    DepartmentCode NVARCHAR(50) NOT NULL,   
-    DepartmentName NVARCHAR(100) NOT NULL,
+    DepartmentCode VARCHAR2(50 CHAR) NOT NULL,
+    DepartmentName VARCHAR2(100 CHAR) NOT NULL,
 
-    Status SMALLINT NOT NULL
-        CONSTRAINT DF_Departments_Status DEFAULT 1,  
+    Status NUMBER(5) DEFAULT 1 NOT NULL,
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_Departments_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
-    UpdatedAt DATETIME2(0) NULL,
+    UpdatedAt TIMESTAMP(0) NULL,
 
     CONSTRAINT PK_Departments
         PRIMARY KEY (DepartmentId),
@@ -22,10 +18,10 @@ CREATE TABLE dbo.Departments
         UNIQUE (DepartmentCode)
 );
 
-INSERT INTO dbo.Departments
+INSERT INTO Departments
 (
     DepartmentCode,
     DepartmentName
 )
 VALUES
-(N'IT',          N'資訊部');
+('IT', UNISTR('\8CC7\8A0A\90E8'));

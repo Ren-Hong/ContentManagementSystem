@@ -1,39 +1,37 @@
-﻿CREATE TABLE dbo.RolePermissions
+CREATE TABLE RolePermissions
 (
-    RoleId       UNIQUEIDENTIFIER NOT NULL,
-    PermissionId UNIQUEIDENTIFIER NOT NULL,
-    ScopeId      UNIQUEIDENTIFIER NOT NULL,
+    RoleId RAW(16) NOT NULL,
+    PermissionId RAW(16) NOT NULL,
+    ScopeId RAW(16) NOT NULL,
 
-    CreatedAt    DATETIME2(0) NOT NULL
-        CONSTRAINT DF_RolePermissions_CreatedAt
-        DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
     CONSTRAINT PK_RolePermissions
         PRIMARY KEY (RoleId, PermissionId, ScopeId),
 
     CONSTRAINT FK_RolePermissions_Roles
         FOREIGN KEY (RoleId)
-        REFERENCES dbo.Roles (RoleId)
+        REFERENCES Roles (RoleId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_RolePermissions_Permissions
         FOREIGN KEY (PermissionId)
-        REFERENCES dbo.Permissions (PermissionId)
+        REFERENCES Permissions (PermissionId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_RolePermissions_Scopes
         FOREIGN KEY (ScopeId)
-        REFERENCES dbo.Scopes (ScopeId)
+        REFERENCES Scopes (ScopeId)
 );
 
-INSERT INTO dbo.RolePermissions (RoleId, PermissionId, ScopeId)
+INSERT INTO RolePermissions (RoleId, PermissionId, ScopeId)
 SELECT
     r.RoleId,
     p.PermissionId,
     s.ScopeId
-FROM dbo.Roles r
-JOIN dbo.Permissions p
-    ON p.PermissionCode LIKE N'Content.%'
-JOIN dbo.Scopes s
-    ON s.ScopeCode = N'Department'
-WHERE r.RoleCode = N'Admin';
+FROM Roles r
+JOIN Permissions p
+    ON p.PermissionCode LIKE 'Content.%'
+JOIN Scopes s
+    ON s.ScopeCode = 'Department'
+WHERE r.RoleCode = 'Admin';

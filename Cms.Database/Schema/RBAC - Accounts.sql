@@ -1,20 +1,18 @@
-﻿CREATE TABLE dbo.Accounts
+CREATE TABLE Accounts
 (
-    AccountId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_Accounts_AccountId DEFAULT NEWSEQUENTIALID(),
+    AccountId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    Username NVARCHAR(50) NOT NULL,
+    Username VARCHAR2(50 CHAR) NOT NULL,
 
-    PasswordHash NVARCHAR(255) NOT NULL,
+    PasswordHash VARCHAR2(255 CHAR) NOT NULL,
 
-    Status SMALLINT NOT NULL,
+    Status NUMBER(5) NOT NULL,
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_Accounts_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
-    UpdatedAt DATETIME2(0) NULL,
+    UpdatedAt TIMESTAMP(0) NULL,
 
-    LastLoginAt DATETIME2(0) NULL,
+    LastLoginAt TIMESTAMP(0) NULL,
 
     CONSTRAINT PK_Accounts
         PRIMARY KEY (AccountId),
@@ -23,7 +21,7 @@
         UNIQUE (Username)
 );
 
-INSERT INTO dbo.Accounts
+INSERT INTO Accounts
 (
     Username,
     PasswordHash,
@@ -31,7 +29,9 @@ INSERT INTO dbo.Accounts
 )
 VALUES
 (
-    N'admin',
-    N'$2a$11$fp9EDc/tghYChbRxOh9rEO9mcy/akdOTAyK2lm2NzmCzI9RaLnS3q',
+    'admin',
+    '$2a$11$fp9EDc/tghYChbRxOh9rEO9mcy/akdOTAyK2lm2NzmCzI9RaLnS3q',
     1
 );
+
+COMMIT;

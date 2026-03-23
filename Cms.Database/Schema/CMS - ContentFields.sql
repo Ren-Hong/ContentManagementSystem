@@ -1,14 +1,14 @@
 CREATE TABLE ContentFields (
-    FieldId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_ContentFields_FieldId DEFAULT NEWID(),
+    FieldId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    FieldCode NVARCHAR(50) NOT NULL,
+    FieldCode VARCHAR2(50 CHAR) NOT NULL,
 
-    FieldType NVARCHAR(30) NOT NULL,   -- text / richtext / number / enum
+    FieldType VARCHAR2(30 CHAR) NOT NULL,   -- text / richtext / number / enum
 
-    IsRequired BIT NOT NULL DEFAULT 0, -- 該表單欄位是否為必填
+    IsRequired NUMBER(1) DEFAULT 0 NOT NULL
+        CONSTRAINT CK_ContentFields_IsRequired CHECK (IsRequired IN (0, 1)), -- Required field flag
 
-    CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CreatedAt TIMESTAMP(6) DEFAULT CAST(SYSTIMESTAMP AS TIMESTAMP(6)) NOT NULL,
 
     CONSTRAINT PK_ContentFields
         PRIMARY KEY (FieldId),

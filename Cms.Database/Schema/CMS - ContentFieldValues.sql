@@ -1,9 +1,9 @@
 CREATE TABLE ContentFieldValues (
-    RevisionId UNIQUEIDENTIFIER NOT NULL,
+    RevisionId RAW(16) NOT NULL,
 
-    FieldId UNIQUEIDENTIFIER NOT NULL,
+    FieldId RAW(16) NOT NULL,
 
-    FieldValue NVARCHAR(MAX) NULL,
+    FieldValue VARCHAR2(4000 CHAR) NULL,
 
     CONSTRAINT PK_ContentFieldValues
         PRIMARY KEY (RevisionId, FieldId),

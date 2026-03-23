@@ -1,12 +1,14 @@
-CREATE TABLE ContentRevisions (
-    RevisionId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT PK_ContentRevisions PRIMARY KEY
-        DEFAULT NEWID(),
+CREATE TABLE ContentRevisions
+(
+    RevisionId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    ContentId UNIQUEIDENTIFIER NOT NULL,
-    Version INT NOT NULL,
+    ContentId RAW(16) NOT NULL,
+    Version NUMBER(10) NOT NULL,
 
-    CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CreatedAt TIMESTAMP(6) DEFAULT CAST(SYSTIMESTAMP AS TIMESTAMP(6)) NOT NULL,
+
+    CONSTRAINT PK_ContentRevisions
+        PRIMARY KEY (RevisionId),
 
     CONSTRAINT FK_ContentRevisions_Contents
         FOREIGN KEY (ContentId)
@@ -15,3 +17,4 @@ CREATE TABLE ContentRevisions (
     CONSTRAINT UQ_ContentRevisions_Content_Version
         UNIQUE (ContentId, Version)
 );
+

@@ -1,20 +1,16 @@
-﻿CREATE TABLE dbo.Permissions
+CREATE TABLE Permissions
 (
-    PermissionId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_Permissions_PermissionId
-        DEFAULT NEWSEQUENTIALID(),
+    PermissionId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    PermissionCode NVARCHAR(120) NOT NULL,   -- e.g. Content.Publish
+    PermissionCode VARCHAR2(120 CHAR) NOT NULL,   -- e.g. Content.Publish
 
-    PermissionName NVARCHAR(200) NULL, 
+    PermissionName VARCHAR2(200 CHAR) NULL,
 
-    Status SMALLINT NOT NULL
-        CONSTRAINT DF_Permissions_Status DEFAULT 1,
+    Status NUMBER(5) DEFAULT 1 NOT NULL,
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_Permissions_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
-    UpdatedAt DATETIME2(0) NULL,
+    UpdatedAt TIMESTAMP(0) NULL,
 
     CONSTRAINT PK_Permissions
         PRIMARY KEY (PermissionId),
@@ -23,9 +19,13 @@
         UNIQUE (PermissionCode)
 );
 
-INSERT INTO dbo.Permissions (PermissionCode, PermissionName)
-VALUES
-(N'Content.View',   N'內容查閱'),
-(N'Content.Create', N'內容新增'),
-(N'Content.Edit',   N'內容編輯'),
-(N'Content.Delete', N'內容刪除');
+INSERT ALL
+    INTO Permissions (PermissionCode, PermissionName)
+    VALUES ('Content.View',   UNISTR('\5167\5BB9\67E5\95B1'))
+    INTO Permissions (PermissionCode, PermissionName)
+    VALUES ('Content.Create', UNISTR('\5167\5BB9\65B0\589E'))
+    INTO Permissions (PermissionCode, PermissionName)
+    VALUES ('Content.Edit',   UNISTR('\5167\5BB9\7DE8\8F2F'))
+    INTO Permissions (PermissionCode, PermissionName)
+    VALUES ('Content.Delete', UNISTR('\5167\5BB9\522A\9664'))
+SELECT 1 FROM DUAL;

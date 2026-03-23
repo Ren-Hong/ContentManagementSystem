@@ -1,12 +1,10 @@
-CREATE TABLE dbo.Scopes
+CREATE TABLE Scopes
 (
-    ScopeId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_Scopes_ScopeId
-        DEFAULT NEWSEQUENTIALID(),
+    ScopeId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    ScopeCode NVARCHAR(30) NOT NULL,   -- Global / Department / Self / Assigned
+    ScopeCode VARCHAR2(30 CHAR) NOT NULL,   -- Global / Department / Self / Assigned
 
-    ScopeName NVARCHAR(100) NULL,
+    ScopeName VARCHAR2(100 CHAR) NULL,
 
     CONSTRAINT PK_Scopes
         PRIMARY KEY (ScopeId),
@@ -15,9 +13,16 @@ CREATE TABLE dbo.Scopes
         UNIQUE (ScopeCode)
 );
 
-INSERT INTO dbo.Scopes (ScopeCode, ScopeName)
-VALUES
-(N'Global',      N'全系統範圍'),
-(N'Department',  N'所屬部門'),
-(N'Self',        N'僅限本人'),
-(N'Assigned',    N'明確指派');
+INSERT ALL
+    INTO Scopes (ScopeCode, ScopeName)
+    VALUES ('Global',     UNISTR('\5168\7CFB\7D71\7BC4\570D'))
+    INTO Scopes (ScopeCode, ScopeName)
+    VALUES ('Department', UNISTR('\6240\5C6C\90E8\9580'))
+    INTO Scopes (ScopeCode, ScopeName)
+    VALUES ('Self',       UNISTR('\50C5\9650\672C\4EBA'))
+    INTO Scopes (ScopeCode, ScopeName)
+    VALUES ('Assigned',   UNISTR('\660E\78BA\6307\6D3E'))
+SELECT 1 FROM DUAL;
+
+COMMIT;
+

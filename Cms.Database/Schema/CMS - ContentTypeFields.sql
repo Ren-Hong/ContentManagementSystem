@@ -1,7 +1,7 @@
 CREATE TABLE ContentTypeFields (
-    TypeId UNIQUEIDENTIFIER NOT NULL,
-    FieldId UNIQUEIDENTIFIER NOT NULL,
-    SortOrder INT NOT NULL DEFAULT 0, --欄位顯示排序
+    TypeId RAW(16) NOT NULL,
+    FieldId RAW(16) NOT NULL,
+    SortOrder NUMBER(10) DEFAULT 0 NOT NULL, -- Display order
 
     CONSTRAINT PK_ContentTypeFields
         PRIMARY KEY (TypeId, FieldId),

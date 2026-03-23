@@ -1,15 +1,17 @@
-CREATE TABLE Contents (
-    ContentId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT PK_Contents PRIMARY KEY
-        DEFAULT NEWID(),
+CREATE TABLE Contents
+(
+    ContentId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    TypeId UNIQUEIDENTIFIER NOT NULL,
+    TypeId RAW(16) NOT NULL,
 
-    OwnerId UNIQUEIDENTIFIER NOT NULL, -- Accounts.AccountId
+    OwnerId RAW(16) NOT NULL,
 
-    Status NVARCHAR(30) NOT NULL,     -- Draft / Review / Published / Archived
+    Status VARCHAR2(30 CHAR) NOT NULL,
 
-    CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CreatedAt TIMESTAMP(6) DEFAULT CAST(SYSTIMESTAMP AS TIMESTAMP(6)) NOT NULL,
+
+    CONSTRAINT PK_Contents
+        PRIMARY KEY (ContentId),
 
     CONSTRAINT FK_Contents_ContentTypes
         FOREIGN KEY (TypeId)
@@ -19,3 +21,4 @@ CREATE TABLE Contents (
         FOREIGN KEY (OwnerId)
         REFERENCES Accounts(AccountId)
 );
+

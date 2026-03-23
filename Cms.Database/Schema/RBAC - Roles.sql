@@ -1,19 +1,15 @@
-﻿CREATE TABLE dbo.Roles
+CREATE TABLE Roles
 (
-    RoleId UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT DF_Roles_RoleId
-        DEFAULT NEWSEQUENTIALID(),
+    RoleId RAW(16) DEFAULT SYS_GUID() NOT NULL,
 
-    RoleCode NVARCHAR(50) NOT NULL,    -- Admin / Editor / Reviewer
-    RoleName NVARCHAR(100) NOT NULL,   -- 系統管理員 / 內容編輯 / 內容審核
+    RoleCode VARCHAR2(50 CHAR) NOT NULL,    -- Admin / Editor / Reviewer
+    RoleName VARCHAR2(100 CHAR) NOT NULL,
 
-    Status SMALLINT NOT NULL
-        CONSTRAINT DF_Roles_Status DEFAULT 1,  -- 1=Enable, 2=Disabled
+    Status NUMBER(5) DEFAULT 1 NOT NULL,  -- 1 = Enabled, 2 = Disabled
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_Roles_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
-    UpdatedAt DATETIME2(0) NULL,
+    UpdatedAt TIMESTAMP(0) NULL,
 
     CONSTRAINT PK_Roles
         PRIMARY KEY (RoleId),
@@ -22,6 +18,6 @@
         UNIQUE (RoleCode)
 );
 
-INSERT INTO dbo.Roles (RoleCode, RoleName)
+INSERT INTO Roles (RoleCode, RoleName)
 VALUES
-(N'Admin', N'系統管理員');
+('Admin', UNISTR('\7CFB\7D71\7BA1\7406\54E1'));

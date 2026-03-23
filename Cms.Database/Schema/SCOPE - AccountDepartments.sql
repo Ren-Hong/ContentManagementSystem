@@ -1,29 +1,28 @@
-CREATE TABLE dbo.AccountDepartments
+CREATE TABLE AccountDepartments
 (
-    AccountId UNIQUEIDENTIFIER NOT NULL,
-    DepartmentId UNIQUEIDENTIFIER NOT NULL,
+    AccountId RAW(16) NOT NULL,
+    DepartmentId RAW(16) NOT NULL,
 
-    IsPrimary BIT NOT NULL
-        CONSTRAINT DF_AccountDepartments_IsPrimary DEFAULT 0,
+    IsPrimary NUMBER(1) DEFAULT 0 NOT NULL
+        CONSTRAINT CK_AccountDepartments_IsPrimary CHECK (IsPrimary IN (0, 1)),
 
-    CreatedAt DATETIME2(0) NOT NULL
-        CONSTRAINT DF_AccountDepartments_CreatedAt DEFAULT SYSUTCDATETIME(),
+    CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
     CONSTRAINT PK_AccountDepartments
         PRIMARY KEY (AccountId, DepartmentId),
 
     CONSTRAINT FK_AccountDepartments_Accounts
         FOREIGN KEY (AccountId)
-        REFERENCES dbo.Accounts(AccountId)
+        REFERENCES Accounts(AccountId)
         ON DELETE CASCADE,
 
     CONSTRAINT FK_AccountDepartments_Departments
         FOREIGN KEY (DepartmentId)
-        REFERENCES dbo.Departments(DepartmentId)
+        REFERENCES Departments(DepartmentId)
         ON DELETE CASCADE
 );
 
-INSERT INTO dbo.AccountDepartments
+INSERT INTO AccountDepartments
 (
     AccountId,
     DepartmentId,
@@ -32,8 +31,8 @@ INSERT INTO dbo.AccountDepartments
 SELECT
     a.AccountId,
     d.DepartmentId,
-    1 -- IsPrimary
-FROM dbo.Accounts a
-JOIN dbo.Departments d
-    ON d.DepartmentCode = N'IT'
-WHERE a.Username = N'admin';
+    1 -- Primary department
+FROM Accounts a
+JOIN Departments d
+    ON d.DepartmentCode = 'IT'
+WHERE a.Username = 'admin';
