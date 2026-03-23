@@ -105,9 +105,9 @@ namespace Cms.Application.Services.Account
             };
         }
 
-        public async Task<PagedResult<AccountListResponseDto>> ListAccountsAsync(PageRequest pageRequest)
+        public async Task<PagedResult<AccountListResponseDto>> PageAccountsAsync(PageRequest pageRequest)
         {
-            var pagedRows = await _accountRepository.ListAccountRoleAssignmentRowsAsync(pageRequest);
+            var pagedRows = await _accountRepository.PageAccountRoleAssignmentRowsAsync(pageRequest);
 
             var grouped = pagedRows.Items
                 .GroupBy(x => new { x.AccountId, x.Username, x.Status })

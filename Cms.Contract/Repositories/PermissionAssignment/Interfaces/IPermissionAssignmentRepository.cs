@@ -9,7 +9,7 @@ namespace Cms.Contract.Repositories.PermissionAssignment.Interfaces
         /// 拿特殊指派摘要
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<PermissionAssignmentRowEntity>> ListPermissionAssignmentRowsAsync(PageRequest pageRequest);
+        Task<PagedResult<PermissionAssignmentRowEntity>> PagePermissionAssignmentRowsAsync(PageRequest pageRequest);
 
     }
 }

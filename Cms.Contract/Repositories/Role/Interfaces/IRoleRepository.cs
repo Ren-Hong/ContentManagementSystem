@@ -23,7 +23,7 @@ namespace Cms.Contract.Repositories.Role.Interfaces
         /// 拿角色摘要
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<RolePermissionScopeRowEntity>> ListRolePermissionScopeRowsAsync(PageRequest pageRequest);
+        Task<PagedResult<RolePermissionScopeRowEntity>> PageRolePermissionScopeRowsAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 判斷角色名稱是否已存在

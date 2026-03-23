@@ -117,7 +117,7 @@ namespace Cms.Infrastructure.Repositories.Account
             return rows.Select(Guid.Parse).ToList();
         }
 
-        public async Task<PagedResult<AccountRoleAssignmentRowEntity>> ListAccountRoleAssignmentRowsAsync(PageRequest pageRequest)
+        public async Task<PagedResult<AccountRoleAssignmentRowEntity>> PageAccountRoleAssignmentRowsAsync(PageRequest pageRequest)
         {
             var offset = (pageRequest.Page - 1) * pageRequest.PageSize;
 

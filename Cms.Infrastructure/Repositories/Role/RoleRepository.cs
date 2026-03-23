@@ -59,7 +59,7 @@ namespace Cms.Infrastructure.Repositories.Role
             );
         }
 
-        public async Task<PagedResult<RolePermissionScopeRowEntity>> ListRolePermissionScopeRowsAsync(PageRequest pageRequest)
+        public async Task<PagedResult<RolePermissionScopeRowEntity>> PageRolePermissionScopeRowsAsync(PageRequest pageRequest)
         {
             var page = pageRequest.Page <= 0 ? 1 : pageRequest.Page;
             var pageSize = pageRequest.PageSize <= 0 ? 10 : pageRequest.PageSize;

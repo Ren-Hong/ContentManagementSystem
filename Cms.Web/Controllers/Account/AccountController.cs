@@ -108,7 +108,7 @@ namespace Cms.Web.Controllers.Account
         [HttpGet]
         public async Task<IActionResult> ListAccounts([FromQuery] PageRequest req)
         {
-            var rdto = await _accountService.ListAccountsAsync(req);
+            var rdto = await _accountService.PageAccountsAsync(req);
 
             var res = new PagedResult<AccountListResponseModel>
             {

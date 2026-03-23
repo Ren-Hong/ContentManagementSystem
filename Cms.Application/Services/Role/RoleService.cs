@@ -45,9 +45,9 @@ namespace Cms.Application.Services.Role
                 .ToList();
         }
 
-        public async Task<PagedResult<RoleListResponseDto>> ListRolesAsync(PageRequest pageRequest)
+        public async Task<PagedResult<RoleListResponseDto>> PageRolesAsync(PageRequest pageRequest)
         {
-            var pagedRows = await _roleRepository.ListRolePermissionScopeRowsAsync(pageRequest);
+            var pagedRows = await _roleRepository.PageRolePermissionScopeRowsAsync(pageRequest);
 
             var grouped = pagedRows.Items
                 .GroupBy(r => new { r.RoleId, r.RoleName, r.Status })

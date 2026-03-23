@@ -15,7 +15,7 @@ namespace Cms.Contract.Services.Role.Interfaces
         /// 角色摘要table
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<RoleListResponseDto>> ListRolesAsync(PageRequest pageRequest);
+        Task<PagedResult<RoleListResponseDto>> PageRolesAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 建立角色

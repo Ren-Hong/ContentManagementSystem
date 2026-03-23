@@ -17,7 +17,7 @@ namespace Cms.Contract.Services.Account.Interfaces
         /// 取得所有帳戶摘要
         /// </summary>
         /// <returns></returns>
-        Task<PagedResult<AccountListResponseDto>> ListAccountsAsync(PageRequest pageRequest);
+        Task<PagedResult<AccountListResponseDto>> PageAccountsAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 建立帳戶

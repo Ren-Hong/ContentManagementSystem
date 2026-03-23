@@ -20,10 +20,10 @@ namespace Cms.Application.Services.PermissionAssignment
             _permissionAssignmentRepository = permissionAssignmentRepository;
         }
 
-        public async Task<PagedResult<PermissionAssignmentListResponseDto>> ListPermissionAssignmentsAsync(PageRequest pageRequest)
+        public async Task<PagedResult<PermissionAssignmentListResponseDto>> PagePermissionAssignmentsAsync(PageRequest pageRequest)
         {
             var paged = await _permissionAssignmentRepository
-                .ListPermissionAssignmentRowsAsync(pageRequest);
+                .PagePermissionAssignmentRowsAsync(pageRequest);
 
             var grouped = paged.Items
                 .GroupBy(x => new { x.AccountId, x.Username })

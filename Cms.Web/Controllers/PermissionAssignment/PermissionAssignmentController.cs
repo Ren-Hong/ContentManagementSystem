@@ -23,7 +23,7 @@ namespace Cms.Web.Controllers.PermissionAssignment
         [HttpGet]
         public async Task<IActionResult> ListPermissionAssignments([FromQuery] PageRequest req)
         {
-            var paged = await _permissionAssignmentService.ListPermissionAssignmentsAsync(req);
+            var paged = await _permissionAssignmentService.PagePermissionAssignmentsAsync(req);
 
             var res = paged.Items
                 .Select(x => new PermissionAssignmentListResponseModel

@@ -41,7 +41,7 @@ namespace Cms.Contract.Repositories.Account.Interfaces
         /// <summary>
         /// 取得所有帳戶摘要
         /// </summary>
-        Task<PagedResult<AccountRoleAssignmentRowEntity>> ListAccountRoleAssignmentRowsAsync(PageRequest pageRequest);
+        Task<PagedResult<AccountRoleAssignmentRowEntity>> PageAccountRoleAssignmentRowsAsync(PageRequest pageRequest);
 
         /// <summary>
         /// 判斷帳號是否已存在

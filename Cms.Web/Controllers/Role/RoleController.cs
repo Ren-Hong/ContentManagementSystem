@@ -42,7 +42,7 @@ namespace Cms.Web.Controllers.Role
         [HttpGet]
         public async Task<IActionResult> ListRoles([FromQuery] PageRequest req)
         {
-            var rdto = await _roleService.ListRolesAsync(req);
+            var rdto = await _roleService.PageRolesAsync(req);
 
             var res = new PagedResult<RoleListResponseModel>
             {

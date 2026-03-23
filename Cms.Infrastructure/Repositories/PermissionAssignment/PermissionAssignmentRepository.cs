@@ -17,7 +17,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
         {
         }
 
-        public async Task<PagedResult<PermissionAssignmentRowEntity>> ListPermissionAssignmentRowsAsync(PageRequest pageRequest)
+        public async Task<PagedResult<PermissionAssignmentRowEntity>> PagePermissionAssignmentRowsAsync(PageRequest pageRequest)
         {
             var page = pageRequest.Page <= 0 ? 1 : pageRequest.Page;
             var pageSize = pageRequest.PageSize <= 0 ? 10 : pageRequest.PageSize;
