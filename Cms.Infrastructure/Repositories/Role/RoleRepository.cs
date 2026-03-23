@@ -166,13 +166,6 @@ namespace Cms.Infrastructure.Repositories.Role
             return roleId;
         }
 
-        public async Task CreateRolePermissionAsync(Guid roleId, Guid permissionId)
-        {
-            throw new NotSupportedException(
-                "RolePermissions requires ScopeId under the current Oracle schema. Use CreateRolePermissionScopeAsync instead."
-            );
-        }
-
         public async Task CreateRolePermissionScopeAsync(Guid roleId, Guid permissionId, Guid scopeId)
         {
             const string sql = @"
