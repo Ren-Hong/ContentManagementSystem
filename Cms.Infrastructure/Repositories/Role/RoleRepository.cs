@@ -60,7 +60,7 @@ namespace Cms.Infrastructure.Repositories.Role
 
             const string countSql = @"
                 SELECT COUNT(*)
-                FROM Roles;
+                FROM Roles
             ";
 
             const string dataSql = @"
@@ -91,7 +91,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 LEFT JOIN RolePermissions rp ON r.RoleId = rp.RoleId
                 LEFT JOIN Permissions p ON rp.PermissionId = p.PermissionId
                 LEFT JOIN Scopes s ON rp.ScopeId = s.ScopeId
-                ORDER BY r.RoleName, p.PermissionName;
+                ORDER BY r.RoleName, p.PermissionName
             ";
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
@@ -188,7 +188,7 @@ namespace Cms.Infrastructure.Repositories.Role
                     :RoleId,
                     :PermissionId,
                     :ScopeId
-                );
+                )
             ";
 
             await _db.ExecuteAsync(

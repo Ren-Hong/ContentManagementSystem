@@ -284,7 +284,7 @@ namespace Cms.Infrastructure.Repositories.Content
                     :RevisionId,
                     :FieldId,
                     :FieldValue
-                );
+                )
             ";
 
             await _db.ExecuteAsync(

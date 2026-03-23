@@ -39,7 +39,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     ON rp.PermissionId = p.PermissionId
                     AND p.Status = 1
                 WHERE a.Username = :Username
-                    AND a.Status = 1;
+                    AND a.Status = 1
             ";
 
             return await _db.QueryAsync<AccountAuthEntity>(
@@ -123,7 +123,7 @@ namespace Cms.Infrastructure.Repositories.Account
 
             const string countSql = @"
                 SELECT COUNT(DISTINCT a.AccountId)
-                FROM Accounts a;
+                FROM Accounts a
             ";
 
             const string dataSql = @" 
@@ -146,25 +146,8 @@ namespace Cms.Infrastructure.Repositories.Account
                 LEFT JOIN AccountRoleAssignments ar ON a.AccountId = ar.AccountId
                 LEFT JOIN Departments d ON ar.DepartmentId = d.DepartmentId
                 LEFT JOIN Roles r ON ar.RoleId = r.RoleId
-                ORDER BY a.Username;
+                ORDER BY a.Username
             ";
-
-            // 下面這段是標準錯誤寫法, 這是對join做offset不是對account, 千萬不能寫成下面這樣, 有機會把join的資料切割
-            // const string dataSql = @" 
-            //     SELECT
-            //         a.AccountId,
-            //         a.Username,
-            //         r.RoleId,
-            //         r.RoleName,
-            //         a.Status
-            //     FROM Accounts a
-            //     LEFT JOIN AccountRoleAssignments ar 
-            //         ON a.AccountId = ar.AccountId
-            //     LEFT JOIN Roles r 
-            //         ON ar.RoleId = r.RoleId
-            //     ORDER BY a.Username
-            //     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY;
-            // ";
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
 
@@ -248,7 +231,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     :AccountId,
                     :RoleId,
                     :DepartmentId
-                );
+                )
             ";
 
             await _db.ExecuteAsync(
@@ -277,7 +260,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     :AccountId,
                     :RoleId,
                     :DepartmentId
-                );
+                )
             ";
 
             await _db.ExecuteAsync(sql, rows, transaction: Tx);

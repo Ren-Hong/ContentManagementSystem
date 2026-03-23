@@ -267,7 +267,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                     :TypeId,
                     :FieldId,
                     :SortOrder
-                );
+                )
             ";
 
             await _db.ExecuteAsync(

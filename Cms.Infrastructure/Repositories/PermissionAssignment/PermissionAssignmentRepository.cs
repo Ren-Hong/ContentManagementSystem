@@ -25,7 +25,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
 
             const string countSql = @"
                 SELECT COUNT(*)
-                FROM Accounts;
+                FROM Accounts
             ";
 
             const string dataSql = @"
@@ -52,7 +52,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
                 LEFT JOIN DepartmentPermissionAssignments dpa ON a.AccountId = dpa.AccountId
                 LEFT JOIN Permissions p ON p.PermissionId = dpa.PermissionId
                 LEFT JOIN Departments d ON d.DepartmentId = dpa.DepartmentId
-                ORDER BY a.Username, p.PermissionName;
+                ORDER BY a.Username, p.PermissionName
             ";
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
