@@ -39,11 +39,13 @@ namespace Cms.Application.Services.PermissionScope
                 return false;
             }
 
+            // 琌局Τ┮Τ场舦
             if (await HasGlobalScopeAsync(accountId, permissionCode))
             {
                 return true;
             }
-
+            
+            // 琩т局Τ "┮妮场" 舦场
             var departmentIds = await GetDepartmentScopeDepartmentIdsAsync(accountId, permissionCode);
 
             return departmentIds.Contains(departmentId);

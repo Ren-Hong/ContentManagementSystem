@@ -41,6 +41,7 @@ namespace Cms.Application.Services.ContentType
                 return [];
             }
 
+            // 是否可以查閱
             var canAccessDepartment = await _permissionScopeService.CanAccessDepartmentAsync(
                 accountId,
                 ContentViewPermissionCode,

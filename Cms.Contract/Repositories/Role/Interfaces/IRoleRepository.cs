@@ -1,61 +1,78 @@
-﻿using Cms.Contract.Common.Pagination;
-using Cms.Contract.Repositories.Role.Persistence;
+using Cms.Contract.Common.Pagination;
 using Cms.Contract.Repositories.Role.Entities;
+using Cms.Contract.Repositories.Role.Persistence;
 
 namespace Cms.Contract.Repositories.Role.Interfaces
 {
+    /// <summary>
+    /// 提供角色與角色權限範圍相關的資料存取操作。
+    /// </summary>
     public interface IRoleRepository
     {
         /// <summary>
-        /// 判斷該角色是否存在
+        /// 判斷指定的角色識別碼是否全部存在。
         /// </summary>
-        /// <param name="roleIds">前端傳過來的角色Id</param>
-        /// <returns>bool</returns>
+        /// <param name="roleIds">角色識別碼集合。</param>
+        /// <returns>若全部存在則為 <c>true</c>；否則為 <c>false</c>。</returns>
         Task<bool> AllRolesExistAsync(List<Guid> roleIds);
-        
+
         /// <summary>
-        /// 列出角色 lookup 資料
+        /// 取得角色 lookup 資料。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>角色 lookup 資料集合。</returns>
         Task<IEnumerable<RoleLookupEntity>> ListRoleLookupsAsync();
 
         /// <summary>
-        /// 拿角色摘要
+        /// 以分頁方式取得角色與權限範圍摘要資料。
         /// </summary>
-        /// <returns></returns>
+        /// <param name="pageRequest">分頁條件。</param>
+        /// <returns>角色與權限範圍摘要的分頁結果。</returns>
         Task<PagedResult<RolePermissionScopeRowEntity>> PageRolePermissionScopeRowsAsync(PageRequest pageRequest);
 
         /// <summary>
-        /// 判斷角色名稱是否已存在
+        /// 判斷指定角色名稱是否已存在。
         /// </summary>
+        /// <param name="roleName">角色名稱。</param>
+        /// <returns>若角色名稱已存在則為 <c>true</c>；否則為 <c>false</c>。</returns>
         Task<bool> RoleNameExistsAsync(string roleName);
 
         /// <summary>
-        /// 建立角色
+        /// 建立角色。
         /// </summary>
-        /// <returns></returns>
+        /// <param name="roleName">角色名稱。</param>
+        /// <param name="roleCode">角色代碼。</param>
+        /// <returns>新建立的角色識別碼。</returns>
         Task<Guid> CreateRoleAsync(string roleName, string roleCode);
 
         /// <summary>
-        /// 幫角色權限加作用範圍
+        /// 建立角色、權限與作用範圍的對應資料。
         /// </summary>
-        /// <returns>不用回傳值, 失敗就是例外</returns>
-        Task CreateRolePermissionScopeAsync(Guid roleId, Guid permissionId, Guid ScopeId);
+        /// <param name="roleId">角色識別碼。</param>
+        /// <param name="permissionId">權限識別碼。</param>
+        /// <param name="scopeId">作用範圍識別碼。</param>
+        /// <returns>表示非同步作業的工作。</returns>
+        Task CreateRolePermissionScopeAsync(Guid roleId, Guid permissionId, Guid scopeId);
 
         /// <summary>
-        /// 先改狀態後改中介表
+        /// 更新角色狀態並回傳角色識別碼。
         /// </summary>
-        /// <returns>後面要改中介表所以回傳guid</returns>
+        /// <param name="roleName">角色名稱。</param>
+        /// <param name="status">角色狀態。</param>
+        /// <returns>被更新的角色識別碼。</returns>
         Task<Guid> UpdateRoleStatusAsync(string roleName, RoleStatus status);
 
         /// <summary>
-        /// 真刪角色
+        /// 刪除指定角色。
         /// </summary>
+        /// <param name="roleName">角色名稱。</param>
+        /// <returns>表示非同步作業的工作。</returns>
         Task DeleteRoleAsync(string roleName);
 
         /// <summary>
-        /// 刪掉帳戶所有對應角色
+        /// 刪除指定角色的所有權限對應資料。
         /// </summary>
+        /// <param name="roleId">角色識別碼。</param>
+        /// <returns>表示非同步作業的工作。</returns>
         Task DeleteRolePermissionsAsync(Guid roleId);
     }
 }
