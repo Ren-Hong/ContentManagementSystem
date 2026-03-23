@@ -24,7 +24,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                     TypeCode,
                     TypeName
                 FROM ContentTypes
-                WHERE DepartmentId = @DepartmentId
+                WHERE DepartmentId = :DepartmentId
                 AND IsEnabled = 1
                 ORDER BY TypeName
             ";
@@ -50,7 +50,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 FROM ContentTypeFields ctf
                 INNER JOIN ContentFields cf
                     ON cf.FieldId = ctf.FieldId
-                WHERE ctf.TypeId = @TypeId
+                WHERE ctf.TypeId = :TypeId
                 ORDER BY ctf.SortOrder, cf.FieldCode
             ";
 
@@ -69,8 +69,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE DepartmentId = @DepartmentId
-                AND TypeName = @TypeName
+                WHERE DepartmentId = :DepartmentId
+                AND TypeName = :TypeName
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -91,8 +91,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT TypeId
                 FROM ContentTypes
-                WHERE DepartmentId = @DepartmentId
-                AND TypeName = @TypeName
+                WHERE DepartmentId = :DepartmentId
+                AND TypeName = :TypeName
             ";
 
             return await _db.ExecuteScalarAsync<Guid?>(
@@ -111,7 +111,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -128,7 +128,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT DepartmentId
                 FROM ContentTypes
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             return await _db.ExecuteScalarAsync<Guid?>(
@@ -140,46 +140,46 @@ namespace Cms.Infrastructure.Repositories.ContentType
 
         public async Task<Guid> CreateContentTypeAsync(Guid departmentId, string typeName, string typeCode)
         {
+            var typeId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO ContentTypes
                 (
                     TypeId,
                     DepartmentId,
                     TypeCode,
-                    TypeName,
-                    IsEnabled,
-                    CreatedAt
+                    TypeName
                 )
-                OUTPUT INSERTED.TypeId
                 VALUES
                 (
-                    NEWID(),
-                    @DepartmentId,
-                    @TypeCode,
-                    @TypeName,
-                    1,
-                    SYSUTCDATETIME()
-                );
+                    :TypeId,
+                    :DepartmentId,
+                    :TypeCode,
+                    :TypeName
+                )
             ";
 
-            return await _db.ExecuteScalarAsync<Guid>(
+            await _db.ExecuteAsync(
                 sql,
                 new
                 {
+                    TypeId = typeId,
                     DepartmentId = departmentId,
                     TypeName = typeName,
                     TypeCode = typeCode
                 },
                 transaction: Tx
             );
+
+            return typeId;
         }
 
         public async Task UpdateContentTypeAsync(Guid typeId, string typeName)
         {
             const string sql = @"
                 UPDATE ContentTypes
-                SET TypeName = @TypeName
-                WHERE TypeId = @TypeId
+                SET TypeName = :TypeName
+                WHERE TypeId = :TypeId
             ";
 
             await _db.ExecuteAsync(
@@ -195,47 +195,23 @@ namespace Cms.Infrastructure.Repositories.ContentType
 
         public async Task<Guid> CreateContentFieldAsync(string fieldCode, string fieldType, bool isRequired)
         {
+            var fieldId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO ContentFields
                 (
                     FieldId,
                     FieldCode,
                     FieldType,
-                    IsRequired,
-                    CreatedAt
+                    IsRequired
                 )
-                OUTPUT INSERTED.FieldId
                 VALUES
                 (
-                    NEWID(),
-                    @FieldCode,
-                    @FieldType,
-                    @IsRequired,
-                    SYSUTCDATETIME()
-                );
-            ";
-
-            return await _db.ExecuteScalarAsync<Guid>(
-                sql,
-                new
-                {
-                    FieldCode = fieldCode,
-                    FieldType = fieldType,
-                    IsRequired = isRequired
-                },
-                transaction: Tx
-            );
-        }
-
-        public async Task UpdateContentFieldAsync(Guid fieldId, string fieldCode, string fieldType, bool isRequired)
-        {
-            const string sql = @"
-                UPDATE ContentFields
-                SET
-                    FieldCode = @FieldCode,
-                    FieldType = @FieldType,
-                    IsRequired = @IsRequired
-                WHERE FieldId = @FieldId
+                    :FieldId,
+                    :FieldCode,
+                    :FieldType,
+                    :IsRequired
+                )
             ";
 
             await _db.ExecuteAsync(
@@ -245,7 +221,33 @@ namespace Cms.Infrastructure.Repositories.ContentType
                     FieldId = fieldId,
                     FieldCode = fieldCode,
                     FieldType = fieldType,
-                    IsRequired = isRequired
+                    IsRequired = isRequired ? 1 : 0
+                },
+                transaction: Tx
+            );
+
+            return fieldId;
+        }
+
+        public async Task UpdateContentFieldAsync(Guid fieldId, string fieldCode, string fieldType, bool isRequired)
+        {
+            const string sql = @"
+                UPDATE ContentFields
+                SET
+                    FieldCode = :FieldCode,
+                    FieldType = :FieldType,
+                    IsRequired = :IsRequired
+                WHERE FieldId = :FieldId
+            ";
+
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    FieldId = fieldId,
+                    FieldCode = fieldCode,
+                    FieldType = fieldType,
+                    IsRequired = isRequired ? 1 : 0
                 },
                 transaction: Tx
             );
@@ -262,9 +264,9 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 )
                 VALUES
                 (
-                    @TypeId,
-                    @FieldId,
-                    @SortOrder
+                    :TypeId,
+                    :FieldId,
+                    :SortOrder
                 );
             ";
 
@@ -284,9 +286,9 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 UPDATE ContentTypeFields
-                SET SortOrder = @SortOrder
-                WHERE TypeId = @TypeId
-                AND FieldId = @FieldId
+                SET SortOrder = :SortOrder
+                WHERE TypeId = :TypeId
+                AND FieldId = :FieldId
             ";
 
             await _db.ExecuteAsync(
@@ -305,8 +307,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentTypeFields
-                WHERE TypeId = @TypeId
-                AND FieldId = @FieldId
+                WHERE TypeId = :TypeId
+                AND FieldId = :FieldId
             ";
 
             await _db.ExecuteAsync(
@@ -324,7 +326,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentFields
-                WHERE FieldId = @FieldId
+                WHERE FieldId = :FieldId
             ";
 
             await _db.ExecuteAsync(
@@ -338,7 +340,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentTypes
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             await _db.ExecuteAsync(
@@ -353,7 +355,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM Contents
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -370,7 +372,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentFieldValues
-                WHERE FieldId = @FieldId
+                WHERE FieldId = :FieldId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(

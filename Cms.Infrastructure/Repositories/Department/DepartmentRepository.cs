@@ -21,7 +21,7 @@ namespace Cms.Infrastructure.Repositories.Department
             const string sql = @"
                 SELECT COUNT(DepartmentId)
                 FROM Departments
-                WHERE DepartmentId IN @DepartmentIds
+                WHERE DepartmentId IN :DepartmentIds
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(
@@ -78,7 +78,7 @@ namespace Cms.Infrastructure.Repositories.Department
                     DepartmentName
                 FROM Departments
                 WHERE Status = 1
-                    AND DepartmentId IN @DepartmentIds
+                    AND DepartmentId IN :DepartmentIds
                 ORDER BY DepartmentCode
             ";
 

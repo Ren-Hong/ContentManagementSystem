@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Cms.Application;
 using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Infrastructure.Dapper;
 using Cms.Infrastructure;
 using Cms.Web.Authorization;
 using Cms.Web.Middlewares;
@@ -11,6 +12,8 @@ using Oracle.ManagedDataAccess.Client;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+OracleDapperBootstrap.Initialize();
 
 // Add services to the container.
 builder.Services

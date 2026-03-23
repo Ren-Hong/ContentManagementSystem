@@ -33,7 +33,7 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
                     SELECT AccountId
                     FROM Accounts
                     ORDER BY Username
-                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+                    OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY
                 )
                 SELECT
                     a.AccountId,

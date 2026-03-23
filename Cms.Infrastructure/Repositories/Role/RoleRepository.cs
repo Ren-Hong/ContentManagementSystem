@@ -23,7 +23,7 @@ namespace Cms.Infrastructure.Repositories.Role
             const string sql = @"
                 SELECT COUNT(RoleId)
                 FROM Roles
-                WHERE RoleId IN @RoleIds
+                WHERE RoleId IN :RoleIds
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(
@@ -70,7 +70,7 @@ namespace Cms.Infrastructure.Repositories.Role
                     SELECT RoleId
                     FROM Roles
                     ORDER BY RoleName
-                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY -- offset前一定要orderby
+                    OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY -- offset前一定要orderby
                 )
                 SELECT
                     r.RoleId,
@@ -120,7 +120,7 @@ namespace Cms.Infrastructure.Repositories.Role
             const string sql = @"
                 SELECT 1
                 FROM Roles
-                WHERE RoleName = @RoleName
+                WHERE RoleName = :RoleName
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -133,32 +133,33 @@ namespace Cms.Infrastructure.Repositories.Role
 
         public async Task<Guid> CreateRoleAsync(string roleName, string roleCode)
         {
+            var roleId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO Roles
                 (
                     RoleId,
                     RoleName,
                     RoleCode,
-                    Status,
-                    CreatedAt
+                    Status
                 )
-                OUTPUT INSERTED.RoleId
                 VALUES
                 (
-                    NEWID(),
-                    @RoleName,
-                    @RoleCode,
-                    1,
-                    GETUTCDATE()
-                );
+                    :RoleId,
+                    :RoleName,
+                    :RoleCode,
+                    :Status
+                )
             ";
 
-            var roleId = await _db.ExecuteScalarAsync<Guid>(
+            await _db.ExecuteAsync(
                 sql,
                 new
                 {
+                    RoleId = roleId,
                     RoleName = roleName,
-                    RoleCode = roleCode
+                    RoleCode = roleCode,
+                    Status = 1
                 },
                 transaction: Tx 
             );
@@ -168,27 +169,8 @@ namespace Cms.Infrastructure.Repositories.Role
 
         public async Task CreateRolePermissionAsync(Guid roleId, Guid permissionId)
         {
-            const string sql = @"
-                INSERT INTO RolePermissions
-                (
-                    RoleId,
-                    PermissionId
-                )
-                VALUES
-                (
-                    @RoleId,
-                    @PermissionId
-                );
-            ";
-
-            await _db.ExecuteAsync(
-                sql,
-                new
-                {
-                    RoleId = roleId,
-                    PermissionId = permissionId
-                },
-                transaction: Tx
+            throw new NotSupportedException(
+                "RolePermissions requires ScopeId under the current Oracle schema. Use CreateRolePermissionScopeAsync instead."
             );
         }
 
@@ -203,9 +185,9 @@ namespace Cms.Infrastructure.Repositories.Role
                 )
                 VALUES
                 (
-                    @RoleId,
-                    @PermissionId,
-                    @ScopeId
+                    :RoleId,
+                    :PermissionId,
+                    :ScopeId
                 );
             ";
 
@@ -223,33 +205,53 @@ namespace Cms.Infrastructure.Repositories.Role
 
         public async Task<Guid> UpdateRoleStatusAsync(string roleName, RoleStatus status)
         {
-            const string sql = @"
-                UPDATE Roles
-                SET
-                    Status = @Status,
-                    UpdatedAt = SYSUTCDATETIME()
-                OUTPUT INSERTED.RoleId
-                WHERE RoleName = @RoleName;
+            const string getRoleIdSql = @"
+                SELECT RoleId
+                FROM Roles
+                WHERE RoleName = :RoleName
             ";
 
-            var roleId = await _db.ExecuteScalarAsync<Guid>(
-                sql,
+            const string updateSql = @"
+                UPDATE Roles
+                SET
+                    Status = :Status,
+                    UpdatedAt = :UpdatedAt
+                WHERE RoleName = :RoleName
+            ";
+
+            var roleId = await _db.ExecuteScalarAsync<Guid?>(
+                getRoleIdSql,
+                new
+                {
+                    RoleName = roleName
+                },
+                Tx
+            );
+
+            if (!roleId.HasValue)
+            {
+                throw new InvalidOperationException($"Role '{roleName}' was not found.");
+            }
+
+            await _db.ExecuteAsync(
+                updateSql,
                 new
                 {
                     RoleName = roleName,
-                    Status = status
+                    Status = status,
+                    UpdatedAt = DateTime.UtcNow
                 },
                 Tx 
             );
 
-            return roleId;
+            return roleId.Value;
         }
 
         public async Task DeleteRoleAsync(string roleName)
         {
             const string sql = @"
                 DELETE FROM Roles
-                WHERE RoleName = @RoleName
+                WHERE RoleName = :RoleName
             ";
 
             await _db.ExecuteAsync(sql, new
@@ -262,7 +264,7 @@ namespace Cms.Infrastructure.Repositories.Role
         {
             const string sql = @"
                 DELETE FROM RolePermissions
-                WHERE RoleId = @RoleId
+                WHERE RoleId = :RoleId
             ";
 
             await _db.ExecuteAsync(

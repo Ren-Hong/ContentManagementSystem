@@ -38,7 +38,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 LEFT JOIN Permissions p 
                     ON rp.PermissionId = p.PermissionId
                     AND p.Status = 1
-                WHERE a.Username = @Username
+                WHERE a.Username = :Username
                     AND a.Status = 1;
             ";
 
@@ -51,7 +51,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task<bool> HasGlobalPermissionScopeAsync(Guid accountId, string permissionCode)
         {
             const string sql = @"
-                SELECT TOP 1 1
+                SELECT 1
                 FROM AccountRoleAssignments ara
                 INNER JOIN Roles r
                     ON r.RoleId = ara.RoleId
@@ -63,9 +63,10 @@ namespace Cms.Infrastructure.Repositories.Account
                     AND p.Status = 1
                 INNER JOIN Scopes s
                     ON s.ScopeId = rp.ScopeId
-                WHERE ara.AccountId = @AccountId
-                    AND p.PermissionCode = @PermissionCode
-                    AND s.ScopeCode = N'Global';
+                WHERE ara.AccountId = :AccountId
+                    AND p.PermissionCode = :PermissionCode
+                    AND s.ScopeCode = :ScopeCode
+                FETCH FIRST 1 ROWS ONLY
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -73,7 +74,8 @@ namespace Cms.Infrastructure.Repositories.Account
                 new
                 {
                     AccountId = accountId,
-                    PermissionCode = permissionCode
+                    PermissionCode = permissionCode,
+                    ScopeCode = "Global"
                 },
                 transaction: Tx
             );
@@ -96,9 +98,9 @@ namespace Cms.Infrastructure.Repositories.Account
                     AND p.Status = 1
                 INNER JOIN Scopes s
                     ON s.ScopeId = rp.ScopeId
-                WHERE ara.AccountId = @AccountId
-                    AND p.PermissionCode = @PermissionCode
-                    AND s.ScopeCode = N'Department';
+                WHERE ara.AccountId = :AccountId
+                    AND p.PermissionCode = :PermissionCode
+                    AND s.ScopeCode = :ScopeCode
             ";
 
             var rows = await _db.QueryAsync<Guid>(
@@ -106,7 +108,8 @@ namespace Cms.Infrastructure.Repositories.Account
                 new
                 {
                     AccountId = accountId,
-                    PermissionCode = permissionCode
+                    PermissionCode = permissionCode,
+                    ScopeCode = "Department"
                 },
                 transaction: Tx
             );
@@ -128,7 +131,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     SELECT AccountId
                     FROM Accounts
                     ORDER BY Username
-                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
+                    OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY
                 )
                 SELECT
                     a.AccountId,
@@ -160,7 +163,7 @@ namespace Cms.Infrastructure.Repositories.Account
             //     LEFT JOIN Roles r 
             //         ON ar.RoleId = r.RoleId
             //     ORDER BY a.Username
-            //     OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+            //     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY;
             // ";
 
             var totalCount = await _db.ExecuteScalarAsync<int>(countSql);
@@ -184,7 +187,7 @@ namespace Cms.Infrastructure.Repositories.Account
             const string sql = @"
                 SELECT 1
                 FROM Accounts
-                WHERE Username = @Username
+                WHERE Username = :Username
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -197,32 +200,33 @@ namespace Cms.Infrastructure.Repositories.Account
 
         public async Task<Guid> CreateAccountAsync(string username, string passwordHash)
         {
+            var accountId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO Accounts
                 (
                     AccountId,
                     Username,
                     PasswordHash,
-                    Status,
-                    CreatedAt
+                    Status
                 )
-                OUTPUT INSERTED.AccountId
                 VALUES
                 (
-                    NEWID(),
-                    @Username,
-                    @PasswordHash,
-                    1,
-                    GETUTCDATE()
-                );
+                    :AccountId,
+                    :Username,
+                    :PasswordHash,
+                    :Status
+                )
             ";
 
-            var accountId = await _db.ExecuteScalarAsync<Guid>(
+            await _db.ExecuteAsync(
                 sql, 
                 new
                 {
+                    AccountId = accountId,
                     Username = username,
-                    PasswordHash = passwordHash
+                    PasswordHash = passwordHash,
+                    Status = 1
                 },
                 transaction: Tx   // 🔥 關鍵 有交易Tx就不會是null, service層會先new起來
             );
@@ -241,9 +245,9 @@ namespace Cms.Infrastructure.Repositories.Account
                 )
                 VALUES
                 (
-                    @AccountId,
-                    @RoleId,
-                    @DepartmentId
+                    :AccountId,
+                    :RoleId,
+                    :DepartmentId
                 );
             ";
 
@@ -268,11 +272,11 @@ namespace Cms.Infrastructure.Repositories.Account
                     RoleId, 
                     DepartmentId
                 )
-                VALUES 
+                VALUES
                 (
-                    @AccountId,
-                    @RoleId, 
-                    @DepartmentId
+                    :AccountId,
+                    :RoleId,
+                    :DepartmentId
                 );
             ";
 
@@ -283,8 +287,8 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 UPDATE Accounts
-                SET LastLoginAt = @LastLoginAt
-                WHERE AccountId = @AccountId
+                SET LastLoginAt = :LastLoginAt
+                WHERE AccountId = :AccountId
             ";
 
             await _db.ExecuteAsync(sql, new
@@ -296,34 +300,54 @@ namespace Cms.Infrastructure.Repositories.Account
 
         public async Task<Guid> UpdateAccountStatusAsync(string username, AccountStatus status)
         {
-            const string sql = @"
-                UPDATE Accounts
-                SET
-                    Status = @Status,
-                    UpdatedAt = SYSUTCDATETIME()
-                OUTPUT INSERTED.AccountId
-                WHERE Username = @Username;
+            const string getAccountIdSql = @"
+                SELECT AccountId
+                FROM Accounts
+                WHERE Username = :Username
             ";
 
-            var accountId = await _db.ExecuteScalarAsync<Guid>(
-                sql,
+            const string updateSql = @"
+                UPDATE Accounts
+                SET
+                    Status = :Status,
+                    UpdatedAt = :UpdatedAt
+                WHERE Username = :Username
+            ";
+
+            var accountId = await _db.ExecuteScalarAsync<Guid?>(
+                getAccountIdSql,
                 new
                 {
-                    Username = username,
-                    Status = status
+                    Username = username
                 },
                 Tx   // ⭐ 關鍵：一定要帶交易
             );
 
-            return accountId;
+            if (!accountId.HasValue)
+            {
+                throw new InvalidOperationException($"Account '{username}' was not found.");
+            }
+
+            await _db.ExecuteAsync(
+                updateSql,
+                new
+                {
+                    Username = username,
+                    Status = status,
+                    UpdatedAt = DateTime.UtcNow
+                },
+                Tx   // ⭐ 關鍵：一定要帶交易
+            );
+
+            return accountId.Value;
         }
 
         public async Task UpdatePasswordAsync(string username, string passwordHash)
         {
             const string sql = @"
                 UPDATE Accounts
-                SET PasswordHash = @PasswordHash
-                WHERE Username = @Username
+                SET PasswordHash = :PasswordHash
+                WHERE Username = :Username
             ";
 
             await _db.ExecuteAsync(sql, new
@@ -337,8 +361,8 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 UPDATE Accounts
-                SET UpdatedAt = @UpdatedAt
-                WHERE Username = @Username
+                SET UpdatedAt = :UpdatedAt
+                WHERE Username = :Username
             ";
 
             await _db.ExecuteAsync(sql, new
@@ -352,7 +376,7 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 DELETE FROM Accounts
-                WHERE Username = @Username
+                WHERE Username = :Username
             ";
 
             await _db.ExecuteAsync(sql, new
@@ -365,7 +389,7 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 DELETE FROM AccountRoleAssignments
-                WHERE AccountId = @AccountId
+                WHERE AccountId = :AccountId
             ";
 
             await _db.ExecuteAsync(
@@ -382,20 +406,18 @@ namespace Cms.Infrastructure.Repositories.Account
                 (
                     AccountId, 
                     RoleId, 
-                    DepartmentId,
-                    CreatedAt)
+                    DepartmentId)
                 VALUES 
                 (
-                    @AccountId,
-                    @RoleId,
-                    @DepartmentId,
-                    SYSUTCDATETIME()
+                    :AccountId,
+                    :RoleId,
+                    :DepartmentId
                 )
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { AccountId = accountId, RoleId = roleId },
+                new { AccountId = accountId, RoleId = roleId, DepartmentId = departmentId },
                 transaction: Tx
             );
         }

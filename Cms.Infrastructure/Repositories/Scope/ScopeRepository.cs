@@ -26,7 +26,7 @@ namespace Cms.Infrastructure.Repositories.Scope
                     ScopeCode,
                     ScopeName
                 FROM Scopes
-                WHERE (@IncludeAssigned = 1 OR ScopeCode <> 'Assigned')
+                WHERE (:IncludeAssigned = 1 OR ScopeCode <> 'Assigned')
                 ORDER BY ScopeName
             ";
 
@@ -42,7 +42,7 @@ namespace Cms.Infrastructure.Repositories.Scope
             const string sql = @"
                 SELECT COUNT(ScopeId)
                 FROM Scopes
-                WHERE ScopeId IN @ScopeIds
+                WHERE ScopeId IN :ScopeIds
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(

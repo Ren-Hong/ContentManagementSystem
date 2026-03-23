@@ -21,7 +21,7 @@ namespace Cms.Infrastructure.Repositories.Permission
             const string sql = @"
                 SELECT COUNT(PermissionId)
                 FROM Permissions
-                WHERE PermissionId IN @PermissionIds
+                WHERE PermissionId IN :PermissionIds
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(

@@ -20,7 +20,7 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -37,7 +37,7 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM Contents
-                WHERE ContentId = @ContentId
+                WHERE ContentId = :ContentId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -54,7 +54,7 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentRevisions
-                WHERE RevisionId = @RevisionId
+                WHERE RevisionId = :RevisionId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -71,8 +71,8 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentRevisions
-                WHERE ContentId = @ContentId
-                    AND RevisionId = @RevisionId
+                WHERE ContentId = :ContentId
+                    AND RevisionId = :RevisionId
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
@@ -95,7 +95,7 @@ namespace Cms.Infrastructure.Repositories.Content
                 FROM ContentRevisions cr
                 INNER JOIN Contents c
                     ON c.ContentId = cr.ContentId
-                WHERE cr.RevisionId = @RevisionId
+                WHERE cr.RevisionId = :RevisionId
             ";
 
             return await _db.ExecuteScalarAsync<Guid?>(
@@ -110,7 +110,7 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT DepartmentId
                 FROM ContentTypes
-                WHERE TypeId = @TypeId
+                WHERE TypeId = :TypeId
             ";
 
             return await _db.ExecuteScalarAsync<Guid?>(
@@ -127,7 +127,7 @@ namespace Cms.Infrastructure.Repositories.Content
                 FROM Contents c
                 INNER JOIN ContentTypes ct
                     ON ct.TypeId = c.TypeId
-                WHERE c.ContentId = @ContentId
+                WHERE c.ContentId = :ContentId
             ";
 
             return await _db.ExecuteScalarAsync<Guid?>(
@@ -147,7 +147,7 @@ namespace Cms.Infrastructure.Repositories.Content
                 FROM ContentTypeFields ctf
                 INNER JOIN ContentFields cf
                     ON cf.FieldId = ctf.FieldId
-                WHERE ctf.TypeId = @TypeId
+                WHERE ctf.TypeId = :TypeId
                 ORDER BY ctf.SortOrder, cf.FieldCode
             ";
 
@@ -175,7 +175,7 @@ namespace Cms.Infrastructure.Repositories.Content
                     cf.FieldCode,
                     cf.FieldType,
                     cfv.FieldValue,
-                    ISNULL(ctf.SortOrder, 0) AS SortOrder
+                    COALESCE(ctf.SortOrder, 0) AS SortOrder
                 FROM Contents c
                 INNER JOIN ContentRevisions cr
                     ON cr.ContentId = c.ContentId
@@ -188,8 +188,8 @@ namespace Cms.Infrastructure.Repositories.Content
                 LEFT JOIN ContentTypeFields ctf
                     ON ctf.TypeId = c.TypeId
                     AND ctf.FieldId = cf.FieldId
-                WHERE c.TypeId = @TypeId
-                ORDER BY cr.CreatedAt DESC, ISNULL(ctf.SortOrder, 0), cf.FieldCode
+                WHERE c.TypeId = :TypeId
+                ORDER BY cr.CreatedAt DESC, COALESCE(ctf.SortOrder, 0), cf.FieldCode
             ";
 
             var rows = await _db.QueryAsync<ContentEntity>(
@@ -203,67 +203,71 @@ namespace Cms.Infrastructure.Repositories.Content
 
         public async Task<Guid> CreateContentAsync(Guid typeId, Guid ownerId, string status)
         {
+            var contentId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO Contents
                 (
                     ContentId,
                     TypeId,
                     OwnerId,
-                    Status,
-                    CreatedAt
+                    Status
                 )
-                OUTPUT INSERTED.ContentId
                 VALUES
                 (
-                    NEWID(),
-                    @TypeId,
-                    @OwnerId,
-                    @Status,
-                    SYSUTCDATETIME()
-                );
+                    :ContentId,
+                    :TypeId,
+                    :OwnerId,
+                    :Status
+                )
             ";
 
-            return await _db.ExecuteScalarAsync<Guid>(
+            await _db.ExecuteAsync(
                 sql,
                 new
                 {
+                    ContentId = contentId,
                     TypeId = typeId,
                     OwnerId = ownerId,
                     Status = status
                 },
                 transaction: Tx
             );
+
+            return contentId;
         }
 
         public async Task<Guid> CreateContentRevisionAsync(Guid contentId, int version)
         {
+            var revisionId = Guid.NewGuid();
+
             const string sql = @"
                 INSERT INTO ContentRevisions
                 (
                     RevisionId,
                     ContentId,
-                    Version,
-                    CreatedAt
+                    Version
                 )
-                OUTPUT INSERTED.RevisionId
                 VALUES
                 (
-                    NEWID(),
-                    @ContentId,
-                    @Version,
-                    SYSUTCDATETIME()
-                );
+                    :RevisionId,
+                    :ContentId,
+                    :Version
+                )
             ";
 
-            return await _db.ExecuteScalarAsync<Guid>(
+            await _db.ExecuteAsync(
                 sql,
                 new
                 {
+                    RevisionId = revisionId,
                     ContentId = contentId,
                     Version = version
                 },
                 transaction: Tx
             );
+
+            return revisionId;
         }
 
         public async Task CreateContentFieldValueAsync(Guid revisionId, Guid fieldId, string? fieldValue)
@@ -277,9 +281,9 @@ namespace Cms.Infrastructure.Repositories.Content
                 )
                 VALUES
                 (
-                    @RevisionId,
-                    @FieldId,
-                    @FieldValue
+                    :RevisionId,
+                    :FieldId,
+                    :FieldValue
                 );
             ";
 
@@ -299,9 +303,9 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 UPDATE ContentFieldValues
-                SET FieldValue = @FieldValue
-                WHERE RevisionId = @RevisionId
-                    AND FieldId = @FieldId
+                SET FieldValue = :FieldValue
+                WHERE RevisionId = :RevisionId
+                    AND FieldId = :FieldId
             ";
 
             await _db.ExecuteAsync(
@@ -319,11 +323,13 @@ namespace Cms.Infrastructure.Repositories.Content
         public async Task DeleteContentFieldValuesByContentIdAsync(Guid contentId)
         {
             const string sql = @"
-                DELETE cfv
-                FROM ContentFieldValues cfv
-                INNER JOIN ContentRevisions cr
-                    ON cr.RevisionId = cfv.RevisionId
-                WHERE cr.ContentId = @ContentId
+                DELETE FROM ContentFieldValues
+                WHERE RevisionId IN
+                (
+                    SELECT cr.RevisionId
+                    FROM ContentRevisions cr
+                    WHERE cr.ContentId = :ContentId
+                )
             ";
 
             await _db.ExecuteAsync(
@@ -337,7 +343,7 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 DELETE FROM ContentRevisions
-                WHERE ContentId = @ContentId
+                WHERE ContentId = :ContentId
             ";
 
             await _db.ExecuteAsync(
@@ -351,7 +357,7 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 DELETE FROM Contents
-                WHERE ContentId = @ContentId
+                WHERE ContentId = :ContentId
             ";
 
             await _db.ExecuteAsync(
