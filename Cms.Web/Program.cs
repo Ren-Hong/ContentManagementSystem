@@ -1,14 +1,14 @@
-﻿using Cms.Application;
+﻿using System.Data;
+using System.Text.Json.Serialization;
+using Cms.Application;
 using Cms.Contract.Services.UnitOfWork.Interfaces;
 using Cms.Infrastructure;
 using Cms.Web.Authorization;
 using Cms.Web.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Data.SqlClient;
+using Oracle.ManagedDataAccess.Client;
 using Serilog;
-using System.Data;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,7 +41,7 @@ builder.Services.Scan(scan => scan
 
 // 註冊 DB Connection String
 builder.Services.AddScoped<IDbConnection>(sp =>
-    new SqlConnection(
+    new OracleConnection(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
