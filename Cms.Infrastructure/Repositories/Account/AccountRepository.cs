@@ -1,4 +1,4 @@
-﻿using Cms.Contract.Common.Pagination;
+using Cms.Contract.Common.Pagination;
 using Cms.Contract.Repositories.Account.Entities;
 using Cms.Contract.Repositories.Account.Interfaces;
 using Cms.Contract.Repositories.Account.Persistence;
@@ -14,7 +14,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public AccountRepository(
             IDbConnection db,
             IUnitOfWork unitOfWork
-        ): base(db, unitOfWork)
+        ) : base(db, unitOfWork)
         {
         }
 
@@ -22,20 +22,20 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 SELECT
-                    a.AccountId,
+                    RAWTOHEX(a.AccountId) AS AccountId,
                     a.Username,
                     a.PasswordHash,
                     r.RoleCode,
                     p.PermissionCode
                 FROM Accounts a
-                LEFT JOIN AccountRoleAssignments ar 
+                LEFT JOIN AccountRoleAssignments ar
                     ON a.AccountId = ar.AccountId
-                LEFT JOIN Roles r 
+                LEFT JOIN Roles r
                     ON ar.RoleId = r.RoleId
                     AND r.Status = 1
-                LEFT JOIN RolePermissions rp 
+                LEFT JOIN RolePermissions rp
                     ON r.RoleId = rp.RoleId
-                LEFT JOIN Permissions p 
+                LEFT JOIN Permissions p
                     ON rp.PermissionId = p.PermissionId
                     AND p.Status = 1
                 WHERE a.Username = :Username
@@ -63,7 +63,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     AND p.Status = 1
                 INNER JOIN Scopes s
                     ON s.ScopeId = rp.ScopeId
-                WHERE ara.AccountId = :AccountId
+                WHERE ara.AccountId = HEXTORAW(:AccountId)
                     AND p.PermissionCode = :PermissionCode
                     AND s.ScopeCode = :ScopeCode
                 FETCH FIRST 1 ROWS ONLY
@@ -73,7 +73,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 sql,
                 new
                 {
-                    AccountId = accountId,
+                    AccountId = ToRaw(accountId),
                     PermissionCode = permissionCode,
                     ScopeCode = "Global"
                 },
@@ -86,7 +86,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task<List<Guid>> GetDepartmentIdsByPermissionScopeAsync(Guid accountId, string permissionCode)
         {
             const string sql = @"
-                SELECT DISTINCT ara.DepartmentId
+                SELECT DISTINCT RAWTOHEX(ara.DepartmentId) AS DepartmentId
                 FROM AccountRoleAssignments ara
                 INNER JOIN Roles r
                     ON r.RoleId = ara.RoleId
@@ -98,23 +98,23 @@ namespace Cms.Infrastructure.Repositories.Account
                     AND p.Status = 1
                 INNER JOIN Scopes s
                     ON s.ScopeId = rp.ScopeId
-                WHERE ara.AccountId = :AccountId
+                WHERE ara.AccountId = HEXTORAW(:AccountId)
                     AND p.PermissionCode = :PermissionCode
                     AND s.ScopeCode = :ScopeCode
             ";
 
-            var rows = await _db.QueryAsync<Guid>(
+            var rows = await _db.QueryAsync<string>(
                 sql,
                 new
                 {
-                    AccountId = accountId,
+                    AccountId = ToRaw(accountId),
                     PermissionCode = permissionCode,
                     ScopeCode = "Department"
                 },
                 transaction: Tx
             );
 
-            return rows.ToList();
+            return rows.Select(Guid.Parse).ToList();
         }
 
         public async Task<PagedResult<AccountRoleAssignmentRowEntity>> ListAccountRoleAssignmentRowsAsync(PageRequest pageRequest)
@@ -126,7 +126,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 FROM Accounts a
             ";
 
-            const string dataSql = @" 
+            const string dataSql = @"
                 WITH PagedAccounts AS (
                     SELECT AccountId
                     FROM Accounts
@@ -134,11 +134,11 @@ namespace Cms.Infrastructure.Repositories.Account
                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY
                 )
                 SELECT
-                    a.AccountId,
+                    RAWTOHEX(a.AccountId) AS AccountId,
                     a.Username,
-                    d.DepartmentId,
+                    RAWTOHEX(d.DepartmentId) AS DepartmentId,
                     d.DepartmentName,
-                    r.RoleId,
+                    RAWTOHEX(r.RoleId) AS RoleId,
                     r.RoleName,
                     a.Status
                 FROM Accounts a
@@ -178,7 +178,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 new { Username = username }
             );
 
-            return result != null; // 1 -> true, null -> false
+            return result != null;
         }
 
         public async Task<Guid> CreateAccountAsync(string username, string passwordHash)
@@ -195,7 +195,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 )
                 VALUES
                 (
-                    :AccountId,
+                    HEXTORAW(:AccountId),
                     :Username,
                     :PasswordHash,
                     :Status
@@ -203,15 +203,15 @@ namespace Cms.Infrastructure.Repositories.Account
             ";
 
             await _db.ExecuteAsync(
-                sql, 
+                sql,
                 new
                 {
-                    AccountId = accountId,
+                    AccountId = ToRaw(accountId),
                     Username = username,
                     PasswordHash = passwordHash,
                     Status = 1
                 },
-                transaction: Tx   // 🔥 關鍵 有交易Tx就不會是null, service層會先new起來
+                transaction: Tx
             );
 
             return accountId;
@@ -228,21 +228,21 @@ namespace Cms.Infrastructure.Repositories.Account
                 )
                 VALUES
                 (
-                    :AccountId,
-                    :RoleId,
-                    :DepartmentId
+                    HEXTORAW(:AccountId),
+                    HEXTORAW(:RoleId),
+                    HEXTORAW(:DepartmentId)
                 )
             ";
 
             await _db.ExecuteAsync(
-                sql, 
+                sql,
                 new
                 {
-                    AccountId = accountId,
-                    RoleId = roleId,
-                    DepartmentId = departmentId
+                    AccountId = ToRaw(accountId),
+                    RoleId = ToRaw(roleId),
+                    DepartmentId = ToRaw(departmentId)
                 },
-                transaction: Tx  // 🔥 一樣要
+                transaction: Tx
             );
         }
 
@@ -252,18 +252,33 @@ namespace Cms.Infrastructure.Repositories.Account
                 INSERT INTO AccountRoleAssignments
                 (
                     AccountId,
-                    RoleId, 
+                    RoleId,
                     DepartmentId
                 )
                 VALUES
                 (
-                    :AccountId,
-                    :RoleId,
-                    :DepartmentId
+                    HEXTORAW(:AccountId),
+                    HEXTORAW(:RoleId),
+                    HEXTORAW(:DepartmentId)
                 )
             ";
 
-            await _db.ExecuteAsync(sql, rows, transaction: Tx);
+            var rawRows = rows
+                .Select(row => new
+                {
+                    AccountId = ToRaw(ReadGuidProperty(row, "AccountId")),
+                    RoleId = ToRaw(ReadGuidProperty(row, "RoleId")),
+                    DepartmentId = ToRaw(ReadGuidProperty(row, "DepartmentId"))
+                })
+                .Distinct()
+                .ToList();
+
+            if (rawRows.Count == 0)
+            {
+                return;
+            }
+
+            await _db.ExecuteAsync(sql, rawRows, transaction: Tx);
         }
 
         public async Task UpdateLastLoginAtAsync(Guid accountId, DateTime loginTime)
@@ -271,20 +286,23 @@ namespace Cms.Infrastructure.Repositories.Account
             const string sql = @"
                 UPDATE Accounts
                 SET LastLoginAt = :LastLoginAt
-                WHERE AccountId = :AccountId
+                WHERE AccountId = HEXTORAW(:AccountId)
             ";
 
-            await _db.ExecuteAsync(sql, new
-            {
-                AccountId = accountId,
-                LastLoginAt = loginTime
-            });
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    AccountId = ToRaw(accountId),
+                    LastLoginAt = loginTime
+                }
+            );
         }
 
         public async Task<Guid> UpdateAccountStatusAsync(string username, AccountStatus status)
         {
             const string getAccountIdSql = @"
-                SELECT AccountId
+                SELECT RAWTOHEX(AccountId) AS AccountId
                 FROM Accounts
                 WHERE Username = :Username
             ";
@@ -297,16 +315,16 @@ namespace Cms.Infrastructure.Repositories.Account
                 WHERE Username = :Username
             ";
 
-            var accountId = await _db.ExecuteScalarAsync<Guid?>(
+            var accountIdHex = await _db.ExecuteScalarAsync<string?>(
                 getAccountIdSql,
                 new
                 {
                     Username = username
                 },
-                Tx   // ⭐ 關鍵：一定要帶交易
+                Tx
             );
 
-            if (!accountId.HasValue)
+            if (string.IsNullOrWhiteSpace(accountIdHex))
             {
                 throw new InvalidOperationException($"Account '{username}' was not found.");
             }
@@ -319,10 +337,10 @@ namespace Cms.Infrastructure.Repositories.Account
                     Status = status,
                     UpdatedAt = DateTime.UtcNow
                 },
-                Tx   // ⭐ 關鍵：一定要帶交易
+                Tx
             );
 
-            return accountId.Value;
+            return Guid.Parse(accountIdHex);
         }
 
         public async Task UpdatePasswordAsync(string username, string passwordHash)
@@ -333,11 +351,14 @@ namespace Cms.Infrastructure.Repositories.Account
                 WHERE Username = :Username
             ";
 
-            await _db.ExecuteAsync(sql, new
-            {
-                Username = username,
-                PasswordHash = passwordHash
-            });
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    Username = username,
+                    PasswordHash = passwordHash
+                }
+            );
         }
 
         public async Task UpdateUpdatedAtAsync(string username, DateTime updatedTime)
@@ -348,11 +369,14 @@ namespace Cms.Infrastructure.Repositories.Account
                 WHERE Username = :Username
             ";
 
-            await _db.ExecuteAsync(sql, new
-            {
-                Username = username,
-                UpdatedAt = updatedTime
-            });
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    Username = username,
+                    UpdatedAt = updatedTime
+                }
+            );
         }
 
         public async Task DeleteAccountAsync(string username)
@@ -362,22 +386,25 @@ namespace Cms.Infrastructure.Repositories.Account
                 WHERE Username = :Username
             ";
 
-            await _db.ExecuteAsync(sql, new
-            {
-                Username = username,
-            });
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    Username = username
+                }
+            );
         }
 
         public async Task DeleteAccountRoleAssignmentsAsync(Guid accountId)
         {
             const string sql = @"
                 DELETE FROM AccountRoleAssignments
-                WHERE AccountId = :AccountId
+                WHERE AccountId = HEXTORAW(:AccountId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { AccountId = accountId },
+                new { AccountId = ToRaw(accountId) },
                 transaction: Tx
             );
         }
@@ -385,23 +412,57 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task AddAccountRoleAssignmentAsync(Guid accountId, Guid roleId, Guid departmentId)
         {
             const string sql = @"
-                INSERT INTO AccountRoleAssignments 
+                INSERT INTO AccountRoleAssignments
                 (
-                    AccountId, 
-                    RoleId, 
-                    DepartmentId)
-                VALUES 
+                    AccountId,
+                    RoleId,
+                    DepartmentId
+                )
+                VALUES
                 (
-                    :AccountId,
-                    :RoleId,
-                    :DepartmentId
+                    HEXTORAW(:AccountId),
+                    HEXTORAW(:RoleId),
+                    HEXTORAW(:DepartmentId)
                 )
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { AccountId = accountId, RoleId = roleId, DepartmentId = departmentId },
+                new
+                {
+                    AccountId = ToRaw(accountId),
+                    RoleId = ToRaw(roleId),
+                    DepartmentId = ToRaw(departmentId)
+                },
                 transaction: Tx
+            );
+        }
+
+        private static Guid ReadGuidProperty(object row, string propertyName)
+        {
+            ArgumentNullException.ThrowIfNull(row);
+
+            var property = row.GetType().GetProperty(propertyName);
+            if (property is null)
+            {
+                throw new InvalidOperationException(
+                    $"Account role assignment row is missing property '{propertyName}'."
+                );
+            }
+
+            var value = property.GetValue(row);
+            if (value is Guid guid)
+            {
+                return guid;
+            }
+
+            if (value is string text && Guid.TryParse(text, out var parsedGuid))
+            {
+                return parsedGuid;
+            }
+
+            throw new InvalidOperationException(
+                $"Account role assignment property '{propertyName}' is not a valid Guid."
             );
         }
     }

@@ -1,11 +1,9 @@
-﻿using Cms.Contract.Repositories.Role.Entities;
 using Cms.Contract.Repositories.Scope.Entities;
 using Cms.Contract.Repositories.Scope.Interfaces;
 using Cms.Contract.Services.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
-
 
 namespace Cms.Infrastructure.Repositories.Scope
 {
@@ -22,7 +20,7 @@ namespace Cms.Infrastructure.Repositories.Scope
         {
             const string sql = @"
                 SELECT
-                    ScopeId,
+                    RAWTOHEX(ScopeId) AS ScopeId,
                     ScopeCode,
                     ScopeName
                 FROM Scopes
@@ -39,15 +37,22 @@ namespace Cms.Infrastructure.Repositories.Scope
 
         public async Task<bool> AllScopesExistAsync(List<Guid> scopeIds)
         {
-            const string sql = @"
+            if (scopeIds.Count == 0)
+            {
+                return true;
+            }
+
+            var parameters = new DynamicParameters();
+            var inClause = BuildRawInClause(parameters, "ScopeId", scopeIds);
+            var sql = $@"
                 SELECT COUNT(ScopeId)
                 FROM Scopes
-                WHERE ScopeId IN :ScopeIds
+                WHERE ScopeId IN {inClause}
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(
                 sql,
-                new { ScopeIds = scopeIds },
+                parameters,
                 transaction: Tx
             );
 

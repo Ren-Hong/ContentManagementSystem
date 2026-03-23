@@ -1,4 +1,4 @@
-﻿using Cms.Contract.Repositories.Permission.Entities;
+using Cms.Contract.Repositories.Permission.Entities;
 using Cms.Contract.Repositories.Permission.Interfaces;
 using Cms.Contract.Services.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
@@ -18,15 +18,22 @@ namespace Cms.Infrastructure.Repositories.Permission
 
         public async Task<bool> AllPermissionsExistAsync(List<Guid> permissionIds)
         {
-            const string sql = @"
+            if (permissionIds.Count == 0)
+            {
+                return true;
+            }
+
+            var parameters = new DynamicParameters();
+            var inClause = BuildRawInClause(parameters, "PermissionId", permissionIds);
+            var sql = $@"
                 SELECT COUNT(PermissionId)
                 FROM Permissions
-                WHERE PermissionId IN :PermissionIds
+                WHERE PermissionId IN {inClause}
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(
                 sql,
-                new { PermissionIds = permissionIds },
+                parameters,
                 transaction: Tx
             );
 
@@ -37,7 +44,7 @@ namespace Cms.Infrastructure.Repositories.Permission
         {
             const string sql = @"
                 SELECT
-                    PermissionId,
+                    RAWTOHEX(PermissionId) AS PermissionId,
                     PermissionName
                 FROM Permissions
                 WHERE Status = 1

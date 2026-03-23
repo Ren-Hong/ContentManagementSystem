@@ -1,4 +1,4 @@
-﻿using Cms.Contract.Common.Pagination;
+using Cms.Contract.Common.Pagination;
 using Cms.Contract.Repositories.Role.Entities;
 using Cms.Contract.Repositories.Role.Interfaces;
 using Cms.Contract.Repositories.Role.Persistence;
@@ -20,15 +20,22 @@ namespace Cms.Infrastructure.Repositories.Role
 
         public async Task<bool> AllRolesExistAsync(List<Guid> roleIds)
         {
-            const string sql = @"
+            if (roleIds.Count == 0)
+            {
+                return true;
+            }
+
+            var parameters = new DynamicParameters();
+            var inClause = BuildRawInClause(parameters, "RoleId", roleIds);
+            var sql = $@"
                 SELECT COUNT(RoleId)
                 FROM Roles
-                WHERE RoleId IN :RoleIds
+                WHERE RoleId IN {inClause}
             ";
 
             var count = await _db.ExecuteScalarAsync<int>(
                 sql,
-                new { RoleIds = roleIds },
+                parameters,
                 transaction: Tx
             );
 
@@ -39,7 +46,7 @@ namespace Cms.Infrastructure.Repositories.Role
         {
             const string sql = @"
                 SELECT
-                    RoleId,
+                    RAWTOHEX(RoleId) AS RoleId,
                     RoleName
                 FROM Roles
                 WHERE Status = 1
@@ -64,29 +71,22 @@ namespace Cms.Infrastructure.Repositories.Role
             ";
 
             const string dataSql = @"
-                -- 建立一張暫時存在的虛擬表:PagedRoles
-                -- 這張表「只負責決定這一頁有哪些 Role」
                 WITH PagedRoles AS (
                     SELECT RoleId
                     FROM Roles
                     ORDER BY RoleName
-                    OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY -- offset前一定要orderby
+                    OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY
                 )
                 SELECT
-                    r.RoleId,
+                    RAWTOHEX(r.RoleId) AS RoleId,
                     r.RoleName,
-
-                    p.PermissionId,
+                    RAWTOHEX(p.PermissionId) AS PermissionId,
                     p.PermissionName,
-
-                    s.ScopeId,
+                    RAWTOHEX(s.ScopeId) AS ScopeId,
                     s.ScopeCode,
                     s.ScopeName,
-
                     r.Status
                 FROM Roles r
-                -- 只留下剛剛分頁選中的 Role
-                -- 等於說：只處理這一頁的 Role
                 JOIN PagedRoles pr ON r.RoleId = pr.RoleId
                 LEFT JOIN RolePermissions rp ON r.RoleId = rp.RoleId
                 LEFT JOIN Permissions p ON rp.PermissionId = p.PermissionId
@@ -114,7 +114,6 @@ namespace Cms.Infrastructure.Repositories.Role
             };
         }
 
-
         public async Task<bool> RoleNameExistsAsync(string roleName)
         {
             const string sql = @"
@@ -128,7 +127,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 new { RoleName = roleName }
             );
 
-            return result != null; // 1 -> true, null -> false
+            return result != null;
         }
 
         public async Task<Guid> CreateRoleAsync(string roleName, string roleCode)
@@ -145,7 +144,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 )
                 VALUES
                 (
-                    :RoleId,
+                    HEXTORAW(:RoleId),
                     :RoleName,
                     :RoleCode,
                     :Status
@@ -156,12 +155,12 @@ namespace Cms.Infrastructure.Repositories.Role
                 sql,
                 new
                 {
-                    RoleId = roleId,
+                    RoleId = ToRaw(roleId),
                     RoleName = roleName,
                     RoleCode = roleCode,
                     Status = 1
                 },
-                transaction: Tx 
+                transaction: Tx
             );
 
             return roleId;
@@ -185,9 +184,9 @@ namespace Cms.Infrastructure.Repositories.Role
                 )
                 VALUES
                 (
-                    :RoleId,
-                    :PermissionId,
-                    :ScopeId
+                    HEXTORAW(:RoleId),
+                    HEXTORAW(:PermissionId),
+                    HEXTORAW(:ScopeId)
                 )
             ";
 
@@ -195,9 +194,9 @@ namespace Cms.Infrastructure.Repositories.Role
                 sql,
                 new
                 {
-                    RoleId = roleId,
-                    PermissionId = permissionId,
-                    ScopeId = scopeId
+                    RoleId = ToRaw(roleId),
+                    PermissionId = ToRaw(permissionId),
+                    ScopeId = ToRaw(scopeId)
                 },
                 transaction: Tx
             );
@@ -206,7 +205,7 @@ namespace Cms.Infrastructure.Repositories.Role
         public async Task<Guid> UpdateRoleStatusAsync(string roleName, RoleStatus status)
         {
             const string getRoleIdSql = @"
-                SELECT RoleId
+                SELECT RAWTOHEX(RoleId) AS RoleId
                 FROM Roles
                 WHERE RoleName = :RoleName
             ";
@@ -219,7 +218,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 WHERE RoleName = :RoleName
             ";
 
-            var roleId = await _db.ExecuteScalarAsync<Guid?>(
+            var roleIdHex = await _db.ExecuteScalarAsync<string?>(
                 getRoleIdSql,
                 new
                 {
@@ -228,7 +227,7 @@ namespace Cms.Infrastructure.Repositories.Role
                 Tx
             );
 
-            if (!roleId.HasValue)
+            if (string.IsNullOrWhiteSpace(roleIdHex))
             {
                 throw new InvalidOperationException($"Role '{roleName}' was not found.");
             }
@@ -241,10 +240,10 @@ namespace Cms.Infrastructure.Repositories.Role
                     Status = status,
                     UpdatedAt = DateTime.UtcNow
                 },
-                Tx 
+                Tx
             );
 
-            return roleId.Value;
+            return Guid.Parse(roleIdHex);
         }
 
         public async Task DeleteRoleAsync(string roleName)
@@ -254,25 +253,27 @@ namespace Cms.Infrastructure.Repositories.Role
                 WHERE RoleName = :RoleName
             ";
 
-            await _db.ExecuteAsync(sql, new
-            {
-                RoleName = roleName,
-            });
+            await _db.ExecuteAsync(
+                sql,
+                new
+                {
+                    RoleName = roleName
+                }
+            );
         }
 
         public async Task DeleteRolePermissionsAsync(Guid roleId)
         {
             const string sql = @"
                 DELETE FROM RolePermissions
-                WHERE RoleId = :RoleId
+                WHERE RoleId = HEXTORAW(:RoleId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { RoleId = roleId },
+                new { RoleId = ToRaw(roleId) },
                 transaction: Tx
             );
         }
-        
     }
 }

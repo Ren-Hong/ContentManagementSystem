@@ -1,9 +1,9 @@
-using System.Data;
 using Cms.Contract.Repositories.Content.Entities;
 using Cms.Contract.Repositories.Content.Interfaces;
 using Cms.Contract.Services.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
+using System.Data;
 
 namespace Cms.Infrastructure.Repositories.Content
 {
@@ -11,7 +11,8 @@ namespace Cms.Infrastructure.Repositories.Content
     {
         public ContentRepository(
             IDbConnection db,
-            IUnitOfWork unitOfWork) : base(db, unitOfWork)
+            IUnitOfWork unitOfWork
+        ) : base(db, unitOfWork)
         {
         }
 
@@ -20,12 +21,12 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
 
@@ -37,12 +38,12 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM Contents
-                WHERE ContentId = :ContentId
+                WHERE ContentId = HEXTORAW(:ContentId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { ContentId = contentId },
+                new { ContentId = ToRaw(contentId) },
                 transaction: Tx
             );
 
@@ -54,12 +55,12 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentRevisions
-                WHERE RevisionId = :RevisionId
+                WHERE RevisionId = HEXTORAW(:RevisionId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { RevisionId = revisionId },
+                new { RevisionId = ToRaw(revisionId) },
                 transaction: Tx
             );
 
@@ -71,16 +72,16 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 SELECT 1
                 FROM ContentRevisions
-                WHERE ContentId = :ContentId
-                    AND RevisionId = :RevisionId
+                WHERE ContentId = HEXTORAW(:ContentId)
+                    AND RevisionId = HEXTORAW(:RevisionId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
                 new
                 {
-                    ContentId = contentId,
-                    RevisionId = revisionId
+                    ContentId = ToRaw(contentId),
+                    RevisionId = ToRaw(revisionId)
                 },
                 transaction: Tx
             );
@@ -91,69 +92,81 @@ namespace Cms.Infrastructure.Repositories.Content
         public async Task<Guid?> GetTypeIdByRevisionIdAsync(Guid revisionId)
         {
             const string sql = @"
-                SELECT c.TypeId
+                SELECT RAWTOHEX(c.TypeId) AS TypeId
                 FROM ContentRevisions cr
                 INNER JOIN Contents c
                     ON c.ContentId = cr.ContentId
-                WHERE cr.RevisionId = :RevisionId
+                WHERE cr.RevisionId = HEXTORAW(:RevisionId)
             ";
 
-            return await _db.ExecuteScalarAsync<Guid?>(
+            var typeIdHex = await _db.ExecuteScalarAsync<string?>(
                 sql,
-                new { RevisionId = revisionId },
+                new { RevisionId = ToRaw(revisionId) },
                 transaction: Tx
             );
+
+            return string.IsNullOrWhiteSpace(typeIdHex)
+                ? null
+                : Guid.Parse(typeIdHex);
         }
 
         public async Task<Guid?> GetDepartmentIdByTypeIdAsync(Guid typeId)
         {
             const string sql = @"
-                SELECT DepartmentId
+                SELECT RAWTOHEX(DepartmentId) AS DepartmentId
                 FROM ContentTypes
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
-            return await _db.ExecuteScalarAsync<Guid?>(
+            var departmentIdHex = await _db.ExecuteScalarAsync<string?>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
+
+            return string.IsNullOrWhiteSpace(departmentIdHex)
+                ? null
+                : Guid.Parse(departmentIdHex);
         }
 
         public async Task<Guid?> GetDepartmentIdByContentIdAsync(Guid contentId)
         {
             const string sql = @"
-                SELECT ct.DepartmentId
+                SELECT RAWTOHEX(ct.DepartmentId) AS DepartmentId
                 FROM Contents c
                 INNER JOIN ContentTypes ct
                     ON ct.TypeId = c.TypeId
-                WHERE c.ContentId = :ContentId
+                WHERE c.ContentId = HEXTORAW(:ContentId)
             ";
 
-            return await _db.ExecuteScalarAsync<Guid?>(
+            var departmentIdHex = await _db.ExecuteScalarAsync<string?>(
                 sql,
-                new { ContentId = contentId },
+                new { ContentId = ToRaw(contentId) },
                 transaction: Tx
             );
+
+            return string.IsNullOrWhiteSpace(departmentIdHex)
+                ? null
+                : Guid.Parse(departmentIdHex);
         }
 
         public async Task<List<ContentTypeFieldDefinitionEntity>> GetFieldDefinitionsByTypeIdAsync(Guid typeId)
         {
             const string sql = @"
                 SELECT
-                    cf.FieldId,
+                    RAWTOHEX(cf.FieldId) AS FieldId,
                     cf.FieldType,
                     cf.IsRequired
                 FROM ContentTypeFields ctf
                 INNER JOIN ContentFields cf
                     ON cf.FieldId = ctf.FieldId
-                WHERE ctf.TypeId = :TypeId
+                WHERE ctf.TypeId = HEXTORAW(:TypeId)
                 ORDER BY ctf.SortOrder, cf.FieldCode
             ";
 
             var fields = await _db.QueryAsync<ContentTypeFieldDefinitionEntity>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
 
@@ -164,14 +177,14 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 SELECT
-                    c.ContentId,
-                    cr.RevisionId,
+                    RAWTOHEX(c.ContentId) AS ContentId,
+                    RAWTOHEX(cr.RevisionId) AS RevisionId,
                     cr.Version,
-                    c.OwnerId,
+                    RAWTOHEX(c.OwnerId) AS OwnerId,
                     a.Username AS OwnerUsername,
                     c.Status,
                     cr.CreatedAt,
-                    cf.FieldId,
+                    RAWTOHEX(cf.FieldId) AS FieldId,
                     cf.FieldCode,
                     cf.FieldType,
                     cfv.FieldValue,
@@ -188,13 +201,13 @@ namespace Cms.Infrastructure.Repositories.Content
                 LEFT JOIN ContentTypeFields ctf
                     ON ctf.TypeId = c.TypeId
                     AND ctf.FieldId = cf.FieldId
-                WHERE c.TypeId = :TypeId
+                WHERE c.TypeId = HEXTORAW(:TypeId)
                 ORDER BY cr.CreatedAt DESC, COALESCE(ctf.SortOrder, 0), cf.FieldCode
             ";
 
             var rows = await _db.QueryAsync<ContentEntity>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
 
@@ -215,9 +228,9 @@ namespace Cms.Infrastructure.Repositories.Content
                 )
                 VALUES
                 (
-                    :ContentId,
-                    :TypeId,
-                    :OwnerId,
+                    HEXTORAW(:ContentId),
+                    HEXTORAW(:TypeId),
+                    HEXTORAW(:OwnerId),
                     :Status
                 )
             ";
@@ -226,9 +239,9 @@ namespace Cms.Infrastructure.Repositories.Content
                 sql,
                 new
                 {
-                    ContentId = contentId,
-                    TypeId = typeId,
-                    OwnerId = ownerId,
+                    ContentId = ToRaw(contentId),
+                    TypeId = ToRaw(typeId),
+                    OwnerId = ToRaw(ownerId),
                     Status = status
                 },
                 transaction: Tx
@@ -250,8 +263,8 @@ namespace Cms.Infrastructure.Repositories.Content
                 )
                 VALUES
                 (
-                    :RevisionId,
-                    :ContentId,
+                    HEXTORAW(:RevisionId),
+                    HEXTORAW(:ContentId),
                     :Version
                 )
             ";
@@ -260,8 +273,8 @@ namespace Cms.Infrastructure.Repositories.Content
                 sql,
                 new
                 {
-                    RevisionId = revisionId,
-                    ContentId = contentId,
+                    RevisionId = ToRaw(revisionId),
+                    ContentId = ToRaw(contentId),
                     Version = version
                 },
                 transaction: Tx
@@ -281,8 +294,8 @@ namespace Cms.Infrastructure.Repositories.Content
                 )
                 VALUES
                 (
-                    :RevisionId,
-                    :FieldId,
+                    HEXTORAW(:RevisionId),
+                    HEXTORAW(:FieldId),
                     :FieldValue
                 )
             ";
@@ -291,8 +304,8 @@ namespace Cms.Infrastructure.Repositories.Content
                 sql,
                 new
                 {
-                    RevisionId = revisionId,
-                    FieldId = fieldId,
+                    RevisionId = ToRaw(revisionId),
+                    FieldId = ToRaw(fieldId),
                     FieldValue = fieldValue
                 },
                 transaction: Tx
@@ -304,16 +317,16 @@ namespace Cms.Infrastructure.Repositories.Content
             const string sql = @"
                 UPDATE ContentFieldValues
                 SET FieldValue = :FieldValue
-                WHERE RevisionId = :RevisionId
-                    AND FieldId = :FieldId
+                WHERE RevisionId = HEXTORAW(:RevisionId)
+                    AND FieldId = HEXTORAW(:FieldId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
                 new
                 {
-                    RevisionId = revisionId,
-                    FieldId = fieldId,
+                    RevisionId = ToRaw(revisionId),
+                    FieldId = ToRaw(fieldId),
                     FieldValue = fieldValue
                 },
                 transaction: Tx
@@ -328,13 +341,13 @@ namespace Cms.Infrastructure.Repositories.Content
                 (
                     SELECT cr.RevisionId
                     FROM ContentRevisions cr
-                    WHERE cr.ContentId = :ContentId
+                    WHERE cr.ContentId = HEXTORAW(:ContentId)
                 )
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { ContentId = contentId },
+                new { ContentId = ToRaw(contentId) },
                 transaction: Tx
             );
         }
@@ -343,12 +356,12 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 DELETE FROM ContentRevisions
-                WHERE ContentId = :ContentId
+                WHERE ContentId = HEXTORAW(:ContentId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { ContentId = contentId },
+                new { ContentId = ToRaw(contentId) },
                 transaction: Tx
             );
         }
@@ -357,12 +370,12 @@ namespace Cms.Infrastructure.Repositories.Content
         {
             const string sql = @"
                 DELETE FROM Contents
-                WHERE ContentId = :ContentId
+                WHERE ContentId = HEXTORAW(:ContentId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { ContentId = contentId },
+                new { ContentId = ToRaw(contentId) },
                 transaction: Tx
             );
         }

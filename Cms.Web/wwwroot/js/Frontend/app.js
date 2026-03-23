@@ -24,7 +24,7 @@ createApp({
 
             pages: {
                 DASH: markRaw(Dashboard),
-                MED: markRaw(InternalMedicine),
+                INTERNAL_MED: markRaw(InternalMedicine),
                 SUR: markRaw(Surgery),
                 ER: markRaw(Emergency),
                 PED: markRaw(Pediatrics),

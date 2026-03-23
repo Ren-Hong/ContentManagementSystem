@@ -36,15 +36,12 @@ namespace Cms.Infrastructure.Repositories.PermissionAssignment
                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY
                 )
                 SELECT
-                    a.AccountId,
+                    RAWTOHEX(a.AccountId) AS AccountId,
                     a.Username,
-
-                    dpa.PermissionId,
+                    RAWTOHEX(dpa.PermissionId) AS PermissionId,
                     p.PermissionName,
-
-                    dpa.DepartmentId,
+                    RAWTOHEX(dpa.DepartmentId) AS DepartmentId,
                     d.DepartmentName,
-
                     dpa.ValidFrom,
                     dpa.ValidTo
                 FROM PagedAccounts pa

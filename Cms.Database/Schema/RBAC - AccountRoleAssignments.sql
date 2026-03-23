@@ -9,7 +9,7 @@ CREATE TABLE AccountRoleAssignments
     CreatedAt TIMESTAMP(0) DEFAULT CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) AS TIMESTAMP(0)) NOT NULL,
 
     CONSTRAINT PK_AccountRolesAssignments
-        PRIMARY KEY (AccountId, RoleId),
+        PRIMARY KEY (AccountId, RoleId, DepartmentId),
 
     CONSTRAINT FK_AccountRolesAssignments_Accounts
         FOREIGN KEY (AccountId)

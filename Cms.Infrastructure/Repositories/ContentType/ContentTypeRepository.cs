@@ -1,9 +1,9 @@
-using System.Data;
-using Dapper;
-using Cms.Contract.Repositories.ContentType.Interfaces;
-using Cms.Infrastructure.Repositories.Base;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
 using Cms.Contract.Repositories.ContentType.Entities;
+using Cms.Contract.Repositories.ContentType.Interfaces;
+using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Infrastructure.Repositories.Base;
+using Dapper;
+using System.Data;
 
 namespace Cms.Infrastructure.Repositories.ContentType
 {
@@ -12,7 +12,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
         public ContentTypeRepository(
             IDbConnection db,
             IUnitOfWork unitOfWork
-        ): base(db, unitOfWork)
+        ) : base(db, unitOfWork)
         {
         }
 
@@ -20,12 +20,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 SELECT
-                    TypeId,
+                    RAWTOHEX(TypeId) AS TypeId,
                     TypeCode,
                     TypeName
                 FROM ContentTypes
-                WHERE DepartmentId = :DepartmentId
-                AND IsEnabled = 1
+                WHERE DepartmentId = HEXTORAW(:DepartmentId)
+                    AND IsEnabled = 1
                 ORDER BY TypeName
             ";
 
@@ -33,7 +33,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 sql,
                 new
                 {
-                    DepartmentId = departmentId
+                    DepartmentId = ToRaw(departmentId)
                 },
                 transaction: Tx
             );
@@ -43,14 +43,14 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 SELECT
-                    cf.FieldId,
+                    RAWTOHEX(cf.FieldId) AS FieldId,
                     cf.FieldCode,
                     cf.FieldType,
                     cf.IsRequired
                 FROM ContentTypeFields ctf
                 INNER JOIN ContentFields cf
                     ON cf.FieldId = ctf.FieldId
-                WHERE ctf.TypeId = :TypeId
+                WHERE ctf.TypeId = HEXTORAW(:TypeId)
                 ORDER BY ctf.SortOrder, cf.FieldCode
             ";
 
@@ -58,7 +58,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 sql,
                 new
                 {
-                    TypeId = typeId
+                    TypeId = ToRaw(typeId)
                 },
                 transaction: Tx
             );
@@ -69,15 +69,15 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE DepartmentId = :DepartmentId
-                AND TypeName = :TypeName
+                WHERE DepartmentId = HEXTORAW(:DepartmentId)
+                    AND TypeName = :TypeName
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
                 new
                 {
-                    DepartmentId = departmentId,
+                    DepartmentId = ToRaw(departmentId),
                     TypeName = typeName
                 },
                 transaction: Tx
@@ -89,21 +89,25 @@ namespace Cms.Infrastructure.Repositories.ContentType
         public async Task<Guid?> GetTypeIdByDepartmentIdAndTypeNameAsync(Guid departmentId, string typeName)
         {
             const string sql = @"
-                SELECT TypeId
+                SELECT RAWTOHEX(TypeId) AS TypeId
                 FROM ContentTypes
-                WHERE DepartmentId = :DepartmentId
-                AND TypeName = :TypeName
+                WHERE DepartmentId = HEXTORAW(:DepartmentId)
+                    AND TypeName = :TypeName
             ";
 
-            return await _db.ExecuteScalarAsync<Guid?>(
+            var typeIdHex = await _db.ExecuteScalarAsync<string?>(
                 sql,
                 new
                 {
-                    DepartmentId = departmentId,
+                    DepartmentId = ToRaw(departmentId),
                     TypeName = typeName
                 },
                 transaction: Tx
             );
+
+            return string.IsNullOrWhiteSpace(typeIdHex)
+                ? null
+                : Guid.Parse(typeIdHex);
         }
 
         public async Task<bool> TypeExistsAsync(Guid typeId)
@@ -111,12 +115,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentTypes
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
 
@@ -126,16 +130,20 @@ namespace Cms.Infrastructure.Repositories.ContentType
         public async Task<Guid?> GetDepartmentIdByTypeIdAsync(Guid typeId)
         {
             const string sql = @"
-                SELECT DepartmentId
+                SELECT RAWTOHEX(DepartmentId) AS DepartmentId
                 FROM ContentTypes
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
-            return await _db.ExecuteScalarAsync<Guid?>(
+            var departmentIdHex = await _db.ExecuteScalarAsync<string?>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
+
+            return string.IsNullOrWhiteSpace(departmentIdHex)
+                ? null
+                : Guid.Parse(departmentIdHex);
         }
 
         public async Task<Guid> CreateContentTypeAsync(Guid departmentId, string typeName, string typeCode)
@@ -152,8 +160,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 )
                 VALUES
                 (
-                    :TypeId,
-                    :DepartmentId,
+                    HEXTORAW(:TypeId),
+                    HEXTORAW(:DepartmentId),
                     :TypeCode,
                     :TypeName
                 )
@@ -163,8 +171,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 sql,
                 new
                 {
-                    TypeId = typeId,
-                    DepartmentId = departmentId,
+                    TypeId = ToRaw(typeId),
+                    DepartmentId = ToRaw(departmentId),
                     TypeName = typeName,
                     TypeCode = typeCode
                 },
@@ -179,14 +187,14 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 UPDATE ContentTypes
                 SET TypeName = :TypeName
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
                 new
                 {
-                    TypeId = typeId,
+                    TypeId = ToRaw(typeId),
                     TypeName = typeName
                 },
                 transaction: Tx
@@ -207,7 +215,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 )
                 VALUES
                 (
-                    :FieldId,
+                    HEXTORAW(:FieldId),
                     :FieldCode,
                     :FieldType,
                     :IsRequired
@@ -218,7 +226,7 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 sql,
                 new
                 {
-                    FieldId = fieldId,
+                    FieldId = ToRaw(fieldId),
                     FieldCode = fieldCode,
                     FieldType = fieldType,
                     IsRequired = isRequired ? 1 : 0
@@ -237,14 +245,14 @@ namespace Cms.Infrastructure.Repositories.ContentType
                     FieldCode = :FieldCode,
                     FieldType = :FieldType,
                     IsRequired = :IsRequired
-                WHERE FieldId = :FieldId
+                WHERE FieldId = HEXTORAW(:FieldId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
                 new
                 {
-                    FieldId = fieldId,
+                    FieldId = ToRaw(fieldId),
                     FieldCode = fieldCode,
                     FieldType = fieldType,
                     IsRequired = isRequired ? 1 : 0
@@ -264,8 +272,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 )
                 VALUES
                 (
-                    :TypeId,
-                    :FieldId,
+                    HEXTORAW(:TypeId),
+                    HEXTORAW(:FieldId),
                     :SortOrder
                 )
             ";
@@ -274,8 +282,8 @@ namespace Cms.Infrastructure.Repositories.ContentType
                 sql,
                 new
                 {
-                    TypeId = typeId,
-                    FieldId = fieldId,
+                    TypeId = ToRaw(typeId),
+                    FieldId = ToRaw(fieldId),
                     SortOrder = sortOrder
                 },
                 transaction: Tx
@@ -287,16 +295,16 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 UPDATE ContentTypeFields
                 SET SortOrder = :SortOrder
-                WHERE TypeId = :TypeId
-                AND FieldId = :FieldId
+                WHERE TypeId = HEXTORAW(:TypeId)
+                    AND FieldId = HEXTORAW(:FieldId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
                 new
                 {
-                    TypeId = typeId,
-                    FieldId = fieldId,
+                    TypeId = ToRaw(typeId),
+                    FieldId = ToRaw(fieldId),
                     SortOrder = sortOrder
                 },
                 transaction: Tx
@@ -307,16 +315,16 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentTypeFields
-                WHERE TypeId = :TypeId
-                AND FieldId = :FieldId
+                WHERE TypeId = HEXTORAW(:TypeId)
+                    AND FieldId = HEXTORAW(:FieldId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
                 new
                 {
-                    TypeId = typeId,
-                    FieldId = fieldId
+                    TypeId = ToRaw(typeId),
+                    FieldId = ToRaw(fieldId)
                 },
                 transaction: Tx
             );
@@ -326,12 +334,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentFields
-                WHERE FieldId = :FieldId
+                WHERE FieldId = HEXTORAW(:FieldId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { FieldId = fieldId },
+                new { FieldId = ToRaw(fieldId) },
                 transaction: Tx
             );
         }
@@ -340,12 +348,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
         {
             const string sql = @"
                 DELETE FROM ContentTypes
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
             await _db.ExecuteAsync(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
         }
@@ -355,12 +363,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM Contents
-                WHERE TypeId = :TypeId
+                WHERE TypeId = HEXTORAW(:TypeId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { TypeId = typeId },
+                new { TypeId = ToRaw(typeId) },
                 transaction: Tx
             );
 
@@ -372,12 +380,12 @@ namespace Cms.Infrastructure.Repositories.ContentType
             const string sql = @"
                 SELECT 1
                 FROM ContentFieldValues
-                WHERE FieldId = :FieldId
+                WHERE FieldId = HEXTORAW(:FieldId)
             ";
 
             var result = await _db.ExecuteScalarAsync<int?>(
                 sql,
-                new { FieldId = fieldId },
+                new { FieldId = ToRaw(fieldId) },
                 transaction: Tx
             );
 
