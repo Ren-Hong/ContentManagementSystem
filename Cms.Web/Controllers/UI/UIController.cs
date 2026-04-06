@@ -1,10 +1,8 @@
 using Cms.Contract.Controllers.Api;
-using Cms.Contract.Controllers.Department.Models;
-using Cms.Contract.Controllers.Permission.Models;
-using Cms.Contract.Controllers.Role.Models;
-using Cms.Contract.Controllers.Scope.Models;
 using Cms.Contract.Services.RBAC.Interfaces;
 using Cms.Contract.Services.UI.Interfaces;
+using Cms.Contract.Controllers.RBAC.Models;
+using Cms.Contract.Controllers.UI.Models;
 using Cms.Web.Controllers.Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

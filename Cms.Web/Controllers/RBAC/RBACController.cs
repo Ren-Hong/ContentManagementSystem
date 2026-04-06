@@ -1,9 +1,7 @@
 using System.Security.Claims;
 using Cms.Contract.Common.Pagination;
-using Cms.Contract.Controllers.Account.Models;
 using Cms.Contract.Controllers.Api;
-using Cms.Contract.Controllers.Department.Models;
-using Cms.Contract.Controllers.Role.Models;
+using Cms.Contract.Controllers.RBAC.Models;
 using Cms.Contract.Services.RBAC.Dtos;
 using Cms.Contract.Services.RBAC.Interfaces;
 using Cms.Web.Controllers.Api;

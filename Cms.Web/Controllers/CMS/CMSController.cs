@@ -1,6 +1,5 @@
 using Cms.Contract.Controllers.Api;
-using Cms.Contract.Controllers.Content.Models;
-using Cms.Contract.Controllers.ContentType.Models;
+using Cms.Contract.Controllers.CMS.Models;
 using Cms.Contract.Services.CMS.Dtos;
 using Cms.Contract.Services.CMS.Interfaces;
 using Cms.Web.Controllers.Api;
