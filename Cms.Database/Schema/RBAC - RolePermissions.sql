@@ -1,32 +1,32 @@
-﻿CREATE TABLE dbo.RolePermissions
+CREATE TABLE dbo.RolePermissionScope
 (
     RoleId       UNIQUEIDENTIFIER NOT NULL,
     PermissionId UNIQUEIDENTIFIER NOT NULL,
     ScopeId      UNIQUEIDENTIFIER NOT NULL,
 
     CreatedAt    DATETIME2(0) NOT NULL
-        CONSTRAINT DF_RolePermissions_CreatedAt
+        CONSTRAINT DF_RolePermissionScope_CreatedAt
         DEFAULT SYSUTCDATETIME(),
 
-    CONSTRAINT PK_RolePermissions
+    CONSTRAINT PK_RolePermissionScope
         PRIMARY KEY (RoleId, PermissionId, ScopeId),
 
-    CONSTRAINT FK_RolePermissions_Roles
+    CONSTRAINT FK_RolePermissionScope_Roles
         FOREIGN KEY (RoleId)
         REFERENCES dbo.Roles (RoleId)
         ON DELETE CASCADE,
 
-    CONSTRAINT FK_RolePermissions_Permissions
+    CONSTRAINT FK_RolePermissionScope_Permissions
         FOREIGN KEY (PermissionId)
         REFERENCES dbo.Permissions (PermissionId)
         ON DELETE CASCADE,
 
-    CONSTRAINT FK_RolePermissions_Scopes
+    CONSTRAINT FK_RolePermissionScope_Scopes
         FOREIGN KEY (ScopeId)
         REFERENCES dbo.Scopes (ScopeId)
 );
 
-INSERT INTO dbo.RolePermissions (RoleId, PermissionId, ScopeId)
+INSERT INTO dbo.RolePermissionScope (RoleId, PermissionId, ScopeId)
 SELECT
     r.RoleId,
     p.PermissionId,
@@ -37,3 +37,4 @@ JOIN dbo.Permissions p
 JOIN dbo.Scopes s
     ON s.ScopeCode = N'Department'
 WHERE r.RoleCode = N'Admin';
+

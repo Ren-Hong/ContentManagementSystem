@@ -28,12 +28,12 @@ namespace Cms.Infrastructure.Repositories.Account
                     r.RoleCode,
                     p.PermissionCode
                 FROM Accounts a
-                LEFT JOIN AccountRoleAssignments ar 
+                LEFT JOIN AccountRoleDepartment ar 
                     ON a.AccountId = ar.AccountId
                 LEFT JOIN Roles r 
                     ON ar.RoleId = r.RoleId
                     AND r.Status = 1
-                LEFT JOIN RolePermissions rp 
+                LEFT JOIN RolePermissionScope rp 
                     ON r.RoleId = rp.RoleId
                 LEFT JOIN Permissions p 
                     ON rp.PermissionId = p.PermissionId
@@ -52,11 +52,11 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 SELECT TOP 1 1
-                FROM AccountRoleAssignments ara
+                FROM AccountRoleDepartment ara
                 INNER JOIN Roles r
                     ON r.RoleId = ara.RoleId
                     AND r.Status = 1
-                INNER JOIN RolePermissions rp
+                INNER JOIN RolePermissionScope rp
                     ON rp.RoleId = r.RoleId
                 INNER JOIN Permissions p
                     ON p.PermissionId = rp.PermissionId
@@ -85,11 +85,11 @@ namespace Cms.Infrastructure.Repositories.Account
         {
             const string sql = @"
                 SELECT DISTINCT ara.DepartmentId
-                FROM AccountRoleAssignments ara
+                FROM AccountRoleDepartment ara
                 INNER JOIN Roles r
                     ON r.RoleId = ara.RoleId
                     AND r.Status = 1
-                INNER JOIN RolePermissions rp
+                INNER JOIN RolePermissionScope rp
                     ON rp.RoleId = r.RoleId
                 INNER JOIN Permissions p
                     ON p.PermissionId = rp.PermissionId
@@ -140,7 +140,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     a.Status
                 FROM Accounts a
                 JOIN PagedAccounts pa ON a.AccountId = pa.AccountId
-                LEFT JOIN AccountRoleAssignments ar ON a.AccountId = ar.AccountId
+                LEFT JOIN AccountRoleDepartment ar ON a.AccountId = ar.AccountId
                 LEFT JOIN Departments d ON ar.DepartmentId = d.DepartmentId
                 LEFT JOIN Roles r ON ar.RoleId = r.RoleId
                 ORDER BY a.Username;
@@ -155,7 +155,7 @@ namespace Cms.Infrastructure.Repositories.Account
             //         r.RoleName,
             //         a.Status
             //     FROM Accounts a
-            //     LEFT JOIN AccountRoleAssignments ar 
+            //     LEFT JOIN AccountRoleDepartment ar 
             //         ON a.AccountId = ar.AccountId
             //     LEFT JOIN Roles r 
             //         ON ar.RoleId = r.RoleId
@@ -233,7 +233,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task CreateAccountRoleAssignmentAsync(Guid accountId, Guid roleId, Guid departmentId)
         {
             const string sql = @"
-                INSERT INTO AccountRoleAssignments
+                INSERT INTO AccountRoleDepartment
                 (
                     AccountId,
                     RoleId,
@@ -262,7 +262,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task CreateAccountRoleAssignmentsAsync(IEnumerable<object> rows)
         {
             const string sql = @"
-                INSERT INTO AccountRoleAssignments
+                INSERT INTO AccountRoleDepartment
                 (
                     AccountId,
                     RoleId, 
@@ -364,7 +364,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task DeleteAccountRoleAssignmentsAsync(Guid accountId)
         {
             const string sql = @"
-                DELETE FROM AccountRoleAssignments
+                DELETE FROM AccountRoleDepartment
                 WHERE AccountId = @AccountId
             ";
 
@@ -378,7 +378,7 @@ namespace Cms.Infrastructure.Repositories.Account
         public async Task AddAccountRoleAssignmentAsync(Guid accountId, Guid roleId, Guid departmentId)
         {
             const string sql = @"
-                INSERT INTO AccountRoleAssignments 
+                INSERT INTO AccountRoleDepartment 
                 (
                     AccountId, 
                     RoleId, 

@@ -1,0 +1,14 @@
+using Cms.Contract.Repositories.Account.Persistence;
+
+namespace Cms.Contract.Services.RBAC.Dtos
+{
+    public class UpdateAccountRequestDto
+    {
+        public required string Username { get; set; }
+
+        public required List<AccountRoleAssignmentRequestDto> RoleAssignments { get; set; }
+
+        public AccountStatus Status { get; set; }
+    }
+}
+

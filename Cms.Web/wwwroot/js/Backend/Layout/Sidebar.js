@@ -16,10 +16,6 @@
                 {
                     key: 'RoleManager',
                     title: '角色管理'
-                },
-                {
-                    key: 'PermissionAssignmentManager',
-                    title: '權限指派'
                 }
             ]
         };
