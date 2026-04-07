@@ -1,6 +1,6 @@
 ﻿import { updateAccount } from '../api/accountApi.js';
-import { getRoleLookups } from '../api/roleApi.js';
-import { getDepartmentLookups } from '../api/departmentApi.js';
+import { getRoleOptions } from '../api/roleApi.js';
+import { getDepartmentOptions } from '../api/departmentApi.js';
 
 import { AccountStatusText } from '../constants/accountStatus.js';
 
@@ -42,8 +42,8 @@ export const AccountEditModal = {
     watch: {
         async show(val) {
             if (val) {
-                await this.loadRoleLookups();
-                await this.loadDepartmentLookups();
+                await this.loadRoleOptions();
+                await this.loadDepartmentOptions();
 
                 this.fillForm();
                 this.modal.show();
@@ -63,9 +63,9 @@ export const AccountEditModal = {
     },
 
     methods: {
-        async loadRoleLookups() {
+        async loadRoleOptions() {
             try {
-                const response = await getRoleLookups();
+                const response = await getRoleOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -79,9 +79,9 @@ export const AccountEditModal = {
             }
         },
 
-        async loadDepartmentLookups() {
+        async loadDepartmentOptions() {
             try {
-                const response = await getDepartmentLookups();
+                const response = await getDepartmentOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -270,3 +270,4 @@ export const AccountEditModal = {
         </div>
     `
 };
+

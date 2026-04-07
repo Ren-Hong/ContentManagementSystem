@@ -1,9 +1,10 @@
-namespace Cms.Contract.Controllers.UI.Models
+namespace Cms.Contract.Controllers.RBAC.Models
 {
-    public class PermissionLookupResponseModel
+    public class PermissionOptionResponseModel
     {
         public required Guid PermissionId { get; set; }
 
         public required string PermissionName { get; set; }
     }
 }
+

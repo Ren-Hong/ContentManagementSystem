@@ -1,6 +1,6 @@
 ﻿import { updateRole } from '../api/roleApi.js';
-import { getPermissionLookups } from '../api/permissionApi.js';
-import { getScopeLookups } from '../api/scopeApi.js';
+import { getPermissionOptions } from '../api/permissionApi.js';
+import { getScopeOptions } from '../api/scopeApi.js';
 import { RoleStatusText } from '../constants/roleStatus.js';
 
 export const RoleEditModal = {
@@ -43,8 +43,8 @@ export const RoleEditModal = {
         async show(val) {
             if (val) {
                 await Promise.all([
-                    this.loadPermissionLookups(),
-                    this.loadScopeLookups()
+                    this.loadPermissionOptions(),
+                    this.loadScopeOptions()
                 ]);
 
                 this.fillForm();
@@ -65,9 +65,9 @@ export const RoleEditModal = {
     },
 
     methods: {
-        async loadPermissionLookups() {
+        async loadPermissionOptions() {
             try {
-                const response = await getPermissionLookups();
+                const response = await getPermissionOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -81,8 +81,8 @@ export const RoleEditModal = {
             }
         },
 
-        async loadScopeLookups() {
-            const response = await getScopeLookups();
+        async loadScopeOptions() {
+            const response = await getScopeOptions();
             if (!response.success) {
                 alert('Scope 選單載入失敗');
                 return;
@@ -284,3 +284,4 @@ export const RoleEditModal = {
         </div>
     `
 };
+

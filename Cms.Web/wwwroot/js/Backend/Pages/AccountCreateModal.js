@@ -1,6 +1,6 @@
 ﻿import { createAccount } from '../api/accountApi.js';
-import { getRoleLookups } from '../api/roleApi.js';
-import { getDepartmentLookups } from '../api/departmentApi.js';
+import { getRoleOptions } from '../api/roleApi.js';
+import { getDepartmentOptions } from '../api/departmentApi.js';
 
 export const AccountCreateModal = {
     props: {
@@ -34,8 +34,8 @@ export const AccountCreateModal = {
     watch: {                        // watch =「當某個值改變時，我要額外做一件事」
         async show(val) {                 //「只要 show 這個 prop 的值改變，如果它變成 true，我就把表單清空。」
             if (val) {
-                await this.loadRoleLookups();
-                await this.loadDepartmentLookups();
+                await this.loadRoleOptions();
+                await this.loadDepartmentOptions();
 
                 this.resetForm();
                 this.modal.show();
@@ -56,9 +56,9 @@ export const AccountCreateModal = {
     },
 
     methods: {
-        async loadRoleLookups() {
+        async loadRoleOptions() {
             try {
-                const response = await getRoleLookups();
+                const response = await getRoleOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -72,9 +72,9 @@ export const AccountCreateModal = {
             }
         },
 
-        async loadDepartmentLookups() {
+        async loadDepartmentOptions() {
             try {
-                const response = await getDepartmentLookups();
+                const response = await getDepartmentOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -249,3 +249,4 @@ export const AccountCreateModal = {
         </div>
     `
 };
+

@@ -9,6 +9,14 @@ namespace Cms.Contract.Services.RBAC.Interfaces
 
         Task<PagedResult<AccountListResponseDto>> ListAccountsAsync(PageRequest pageRequest);
 
+        Task<List<RoleOptionDto>> ListRoleOptionsAsync();
+
+        Task<List<PermissionOptionDto>> ListPermissionOptionsAsync();
+
+        Task<List<ScopeOptionDto>> ListScopeOptionsAsync();
+
+        Task<List<DepartmentOptionDto>> ListDepartmentOptionsAsync();
+
         Task<List<AccessibleDepartmentDto>> ListAccessibleDepartmentsAsync(Guid accountId);
 
         Task<bool> HasGlobalScopeAsync(Guid accountId, string permissionCode);

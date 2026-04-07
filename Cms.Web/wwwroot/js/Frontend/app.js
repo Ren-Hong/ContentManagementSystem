@@ -1,12 +1,10 @@
 import { Header } from './Layout/Header.js';
 import { Sidebar } from './Layout/Sidebar.js';
 
-import { Dashboard } from './Pages/Dashboard.js';
 import { InternalMedicine } from './Pages/InternalMedicine.js';
 import { Surgery } from './Pages/Surgery.js';
 import { Emergency } from './Pages/Emergency.js';
 import { Pediatrics } from './Pages/Pediatrics.js';
-import { Nursing } from './Pages/Nursing.js';
 
 const { createApp, markRaw } = Vue;
 
@@ -18,17 +16,15 @@ createApp({
 
     data() {
         return {
-            currentPage: markRaw(Dashboard),
-            currentDepartmentCode: 'DASH',
+            currentPage: markRaw(InternalMedicine),
+            currentDepartmentCode: 'MED',
             currentDepartmentId: null,
 
             pages: {
-                DASH: markRaw(Dashboard),
                 MED: markRaw(InternalMedicine),
                 SUR: markRaw(Surgery),
                 ER: markRaw(Emergency),
                 PED: markRaw(Pediatrics),
-                NUR: markRaw(Nursing)
             }
         };
     },

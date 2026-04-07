@@ -141,6 +141,103 @@ namespace Cms.Web.Controllers.RBAC
         }
 
         [Authorize(Roles = "Admin")]
+        [HttpGet("roles/options")]
+        public async Task<IActionResult> ListRoleOptions()
+        {
+            var rdto = await _rbacService.ListRoleOptionsAsync();
+
+            var res = rdto.Select(x => new RoleOptionResponseModel
+            {
+                RoleName = x.RoleName,
+                RoleId = x.RoleId,
+            }).ToList();
+
+            return Ok(new ApiResponse<IEnumerable<RoleOptionResponseModel>>
+            {
+                Success = true,
+                Data = res
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("permissions/options")]
+        public async Task<IActionResult> ListPermissionOptions()
+        {
+            var rdto = await _rbacService.ListPermissionOptionsAsync();
+
+            var res = rdto.Select(x => new PermissionOptionResponseModel
+            {
+                PermissionName = x.PermissionName,
+                PermissionId = x.PermissionId,
+            }).ToList();
+
+            return Ok(new ApiResponse<IEnumerable<PermissionOptionResponseModel>>
+            {
+                Success = true,
+                Data = res
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("scopes/options")]
+        public async Task<IActionResult> ListScopeOptions()
+        {
+            var rdto = await _rbacService.ListScopeOptionsAsync();
+
+            var res = rdto.Select(x => new ScopeOptionResponseModel
+            {
+                ScopeName = x.ScopeName,
+                ScopeCode = x.ScopeCode,
+                ScopeId = x.ScopeId,
+            }).ToList();
+
+            return Ok(new ApiResponse<IEnumerable<ScopeOptionResponseModel>>
+            {
+                Success = true,
+                Data = res
+            });
+        }
+
+        [Authorize]
+        [HttpGet("departments/options")]
+        public async Task<IActionResult> ListDepartmentOptions()
+        {
+            var rdto = await _rbacService.ListDepartmentOptionsAsync();
+
+            var res = rdto.Select(x => new DepartmentLookupResponseModel
+            {
+                DepartmentName = x.DepartmentName,
+                DepartmentId = x.DepartmentId,
+            }).ToList();
+
+            return Ok(new ApiResponse<IEnumerable<DepartmentLookupResponseModel>>
+            {
+                Success = true,
+                Data = res
+            });
+        }
+
+        [Authorize(Policy = "Permission.Content.View")]
+        [HttpGet("departments/sidebar")]
+        public async Task<IActionResult> ListAccessibleDepartments()
+        {
+            var rdto = await _rbacService.ListAccessibleDepartmentsAsync(GetCurrentAccountId());
+
+            var res = rdto.Select(x => new AccessibleDepartmentResponseModel
+            {
+                DepartmentId = x.DepartmentId,
+                DepartmentName = x.DepartmentName,
+                DepartmentCode = x.DepartmentCode,
+            }).ToList();
+
+            return Ok(new ApiResponse<IEnumerable<AccessibleDepartmentResponseModel>>
+            {
+                Success = true,
+                Data = res
+            });
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("accounts")]
         public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequestModel req)
         {

@@ -11,7 +11,7 @@ CREATE TABLE dbo.AccountRoleDepartment
         DEFAULT SYSUTCDATETIME(),
 
     CONSTRAINT PK_AccountRoleDepartment
-        PRIMARY KEY (AccountId, RoleId),
+        PRIMARY KEY (AccountId, RoleId, DepartmentId),
 
     CONSTRAINT FK_AccountRoleDepartment_Accounts
         FOREIGN KEY (AccountId)

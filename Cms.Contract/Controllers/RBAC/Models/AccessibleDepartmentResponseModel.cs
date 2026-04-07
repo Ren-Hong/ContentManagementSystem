@@ -1,4 +1,4 @@
-namespace Cms.Contract.Controllers.UI.Models
+namespace Cms.Contract.Controllers.RBAC.Models
 {
     public class AccessibleDepartmentResponseModel
     {
@@ -9,3 +9,4 @@ namespace Cms.Contract.Controllers.UI.Models
         public Guid DepartmentId { get; set; }
     }
 }
+

@@ -1,6 +1,6 @@
 ﻿import { createRole } from '../api/roleApi.js';
-import { getPermissionLookups } from '../api/permissionApi.js';
-import { getScopeLookups } from '../api/scopeApi.js';
+import { getPermissionOptions } from '../api/permissionApi.js';
+import { getScopeOptions } from '../api/scopeApi.js';
 
 export const RoleCreateModal = {
     props: {
@@ -35,8 +35,8 @@ export const RoleCreateModal = {
         async show(val) {                
             if (val) {
                 await Promise.all([
-                    this.loadPermissionLookups(),
-                    this.loadScopeLookups()
+                    this.loadPermissionOptions(),
+                    this.loadScopeOptions()
                 ]);
 
                 this.resetForm();
@@ -56,9 +56,9 @@ export const RoleCreateModal = {
     },
 
     methods: {
-        async loadPermissionLookups() {
+        async loadPermissionOptions() {
             try {
-                const response = await getPermissionLookups();
+                const response = await getPermissionOptions();
 
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
@@ -72,9 +72,9 @@ export const RoleCreateModal = {
             }
         },
 
-        async loadScopeLookups() {
+        async loadScopeOptions() {
             try {
-                const response = await getScopeLookups();
+                const response = await getScopeOptions();
                 if (!response.success) {
                     alert(`錯誤代碼 -> ${response.errorCode}`);
                     return;
@@ -274,3 +274,4 @@ export const RoleCreateModal = {
         </div>
     `
 };
+

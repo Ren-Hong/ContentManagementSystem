@@ -156,6 +156,58 @@ namespace Cms.Application.Services.RBAC
             };
         }
 
+        public async Task<List<RoleOptionDto>> ListRoleOptionsAsync()
+        {
+            var rows = await _roleRepository.ListRoleLookupsAsync();
+
+            return rows
+                .Select(x => new RoleOptionDto
+                {
+                    RoleId = x.RoleId,
+                    RoleName = x.RoleName
+                })
+                .ToList();
+        }
+
+        public async Task<List<PermissionOptionDto>> ListPermissionOptionsAsync()
+        {
+            var rows = await _permissionRepository.ListPermissionLookupsAsync();
+
+            return rows
+                .Select(x => new PermissionOptionDto
+                {
+                    PermissionId = x.PermissionId,
+                    PermissionName = x.PermissionName
+                })
+                .ToList();
+        }
+
+        public async Task<List<ScopeOptionDto>> ListScopeOptionsAsync()
+        {
+            var rows = await _scopeRepository.ListScopeLookupsAsync();
+
+            return rows
+                .Select(x => new ScopeOptionDto
+                {
+                    ScopeId = x.ScopeId,
+                    ScopeCode = x.ScopeCode,
+                    ScopeName = x.ScopeName
+                })
+                .ToList();
+        }
+
+        public async Task<List<DepartmentOptionDto>> ListDepartmentOptionsAsync()
+        {
+            var rows = await _departmentRepository.ListDepartmentLookupsAsync();
+
+            return rows
+                .Select(x => new DepartmentOptionDto
+                {
+                    DepartmentId = x.DepartmentId,
+                    DepartmentName = x.DepartmentName
+                })
+                .ToList();
+        }
         public async Task<List<AccessibleDepartmentDto>> ListAccessibleDepartmentsAsync(Guid accountId)
         {
             if (accountId == Guid.Empty)

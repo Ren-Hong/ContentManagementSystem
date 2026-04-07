@@ -4,11 +4,11 @@ CREATE TABLE dbo.Departments
         CONSTRAINT DF_Departments_DepartmentId
         DEFAULT NEWSEQUENTIALID(),
 
-    DepartmentCode NVARCHAR(50) NOT NULL,   
+    DepartmentCode NVARCHAR(50) NOT NULL,
     DepartmentName NVARCHAR(100) NOT NULL,
 
     Status SMALLINT NOT NULL
-        CONSTRAINT DF_Departments_Status DEFAULT 1,  
+        CONSTRAINT DF_Departments_Status DEFAULT 1,
 
     CreatedAt DATETIME2(0) NOT NULL
         CONSTRAINT DF_Departments_CreatedAt DEFAULT SYSUTCDATETIME(),
@@ -28,4 +28,8 @@ INSERT INTO dbo.Departments
     DepartmentName
 )
 VALUES
-(N'IT',          N'資訊部');
+(N'IT', N'資訊部'),
+(N'MED', N'內科'),
+(N'SUR', N'外科'),
+(N'ER', N'急診'),
+(N'PED', N'小兒科'),

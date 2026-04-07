@@ -1,4 +1,4 @@
-﻿export async function getRoleLookups() {
+﻿export async function getRoleOptions() {
     return await fetch('/api/roles/options', {
         method: 'GET'
     }).then(response => response.json());
@@ -44,3 +44,4 @@ export async function deleteRole(roleName) {
         method: 'DELETE'
     }).then(response => response.json());
 }
+

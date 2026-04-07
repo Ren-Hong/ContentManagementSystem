@@ -1,8 +1,8 @@
-namespace Cms.Contract.Services.UI.Dtos
+namespace Cms.Contract.Services.RBAC.Dtos
 {
-    public class ScopeLookupDto
+    public class ScopeOptionDto
     {
-        public required Guid ScopeId { get; set; }
+        public Guid ScopeId { get; set; }
 
         public required string ScopeName { get; set; }
 

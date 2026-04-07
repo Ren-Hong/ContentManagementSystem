@@ -1,6 +1,6 @@
-namespace Cms.Contract.Controllers.UI.Models
+namespace Cms.Contract.Controllers.RBAC.Models
 {
-    public class ScopeLookupResponseModel
+    public class ScopeOptionResponseModel
     {
         public required Guid ScopeId { get; set; }
 
@@ -9,3 +9,4 @@ namespace Cms.Contract.Controllers.UI.Models
         public required string ScopeCode { get; set; }
     }
 }
+
