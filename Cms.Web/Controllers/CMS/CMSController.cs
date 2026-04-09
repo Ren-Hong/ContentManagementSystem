@@ -149,7 +149,7 @@ namespace Cms.Web.Controllers.CMS
             });
         }
 
-        [Authorize(Policy = "Permission.Content.View")]
+        [Authorize(Policy = "Permission.ContentType.View")]
         [HttpGet("content-types")]
         public async Task<IActionResult> ListContentTypeLookups([FromQuery] ListContentTypeLookupsRequestModel req)
         {
@@ -173,6 +173,7 @@ namespace Cms.Web.Controllers.CMS
             });
         }
 
+        [Authorize(Policy = "Permission.ContentType.Create")]
         [HttpPost("content-types")]
         public async Task<IActionResult> CreateContentType([FromBody] CreateContentTypeRequestModel req)
         {
@@ -194,7 +195,8 @@ namespace Cms.Web.Controllers.CMS
                             IsRequired = x.IsRequired
                         })
                         .ToList()
-                }
+                },
+                GetCurrentAccountId()
             );
 
             if (rdto.Result != CreateContentTypeResult.Success)
@@ -213,7 +215,7 @@ namespace Cms.Web.Controllers.CMS
             });
         }
 
-        [Authorize(Policy = "Permission.Content.View")]
+        [Authorize(Policy = "Permission.ContentType.View")]
         [HttpGet("content-types/{typeId:guid}/fields")]
         public async Task<IActionResult> ListContentFields(Guid typeId)
         {
@@ -235,6 +237,7 @@ namespace Cms.Web.Controllers.CMS
             });
         }
 
+        [Authorize(Policy = "Permission.ContentType.Edit")]
         [HttpPut("content-types/{typeId:guid}")]
         public async Task<IActionResult> UpdateContentType(Guid typeId, [FromBody] UpdateContentTypeRequestModel req)
         {
@@ -257,7 +260,8 @@ namespace Cms.Web.Controllers.CMS
                             IsRequired = x.IsRequired
                         })
                         .ToList()
-                }
+                },
+                GetCurrentAccountId()
             );
 
             if (rdto.Result != UpdateContentTypeResult.Success)
@@ -271,6 +275,7 @@ namespace Cms.Web.Controllers.CMS
             });
         }
 
+        [Authorize(Policy = "Permission.ContentType.Delete")]
         [HttpDelete("content-types/{typeId:guid}")]
         public async Task<IActionResult> DeleteContentType(Guid typeId)
         {
@@ -278,7 +283,8 @@ namespace Cms.Web.Controllers.CMS
                 new DeleteContentTypeRequestDto
                 {
                     TypeId = typeId
-                }
+                },
+                GetCurrentAccountId()
             );
 
             if (rdto.Result != DeleteContentTypeResult.Success)

@@ -1,6 +1,6 @@
 using Cms.Contract.Repositories.Department.Entities;
 using Cms.Contract.Repositories.Department.Interfaces;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
@@ -90,3 +90,4 @@ namespace Cms.Infrastructure.Repositories.Department
         }
     }
 }
+

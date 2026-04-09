@@ -1,7 +1,7 @@
-﻿using Cms.Contract.Repositories.Role.Entities;
+using Cms.Contract.Repositories.Role.Entities;
 using Cms.Contract.Repositories.Scope.Entities;
 using Cms.Contract.Repositories.Scope.Interfaces;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
@@ -55,3 +55,4 @@ namespace Cms.Infrastructure.Repositories.Scope
         }
     }
 }
+

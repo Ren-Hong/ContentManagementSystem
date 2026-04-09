@@ -1,6 +1,7 @@
-ï»¿using Cms.Application;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Application;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure;
+using Cms.Infrastructure.Repositories.UnitOfWork;
 using Cms.Web.Authorization;
 using Cms.Web.Middlewares;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,15 +18,15 @@ builder.Services
     .AddControllersWithViews()
     .AddJsonOptions(o =>
     {
-        // å‰ç«¯ JSON ä¸­çš„ enum å­—ä¸²å€¼æœƒç”± System.Text.Json è‡ªå‹•è½‰æˆå°æ‡‰çš„ enum
-        // è®“ ApiController çš„ RequestModel å¯ä»¥å¯« Enum 
+        // «eºİ JSON ¤¤ªº enum ¦r¦ê­È·|¥Ñ System.Text.Json ¦Û°ÊÂà¦¨¹ïÀ³ªº enum
+        // Åı ApiController ªº RequestModel ¥i¥H¼g Enum 
         o.JsonSerializerOptions.Converters.Add( 
             new JsonStringEnumConverter()
         );
     });
 
 
-// è‡ªå‹• DI è¨»å†Š, è«‹å…ˆå®‰è£ Scrutor å¥—ä»¶
+// ¦Û°Ê DI µù¥U, ½Ğ¥ı¦w¸Ë Scrutor ®M¥ó
 builder.Services.Scan(scan => scan
     .FromAssemblies(
         typeof(Program).Assembly,           // Cms.Web
@@ -33,48 +34,83 @@ builder.Services.Scan(scan => scan
         typeof(InfrastructureAssemblyMarker).Assembly // Cms.Infrastructure
     )
     .AddClasses(c => c.Where(t =>
-        t.Name.EndsWith("Service") || //åªè¦å°¾å·´å« Service éƒ½æœƒè¢« DI new
+        t.Name.EndsWith("Service") || //¥u­n§À¤Ú¥s Service ³£·|³Q DI new
         t.Name.EndsWith("Repository")))
-    .AsImplementedInterfaces() // è«‹äººè³‡ç”¨è·ç¨±æ‰¾äººéä¾†, ä¸è¦ç›´æ¥ç”¨å§“åæ‰¾äºº, å¦‚æœæœ‰å…©å€‹äººéƒ½æ˜¯ç›¸åŒè·ç¨±, äººè³‡æœƒæ‰¾æœ€å¾Œç™»è¨˜çš„é‚£ä½(æœ€å¾ŒAssemblyåˆ°çš„é‚£ä½)
-    .WithScopedLifetime() //scopedç”Ÿå‘½é€±æœŸ
+    .AsImplementedInterfaces() // ½Ğ¤H¸ê¥ÎÂ¾ºÙ§ä¤H¹L¨Ó, ¤£­nª½±µ¥Î©m¦W§ä¤H, ¦pªG¦³¨â­Ó¤H³£¬O¬Û¦PÂ¾ºÙ, ¤H¸ê·|§ä³Ì«áµn°Oªº¨º¦ì(³Ì«áAssembly¨ìªº¨º¦ì)
+    .WithScopedLifetime() //scoped¥Í©R¶g´Á
 );
 
-// è¨»å†Š DB Connection String
+// µù¥U DB Connection String
 builder.Services.AddScoped<IDbConnection>(sp =>
     new SqlConnection(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
 
-// Service å±¤è¦åŒ… Repository äº¤æ˜“
+// Service ¼h­n¥] Repository ¥æ©ö
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// è¨»å†Šç™»å…¥ç« 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //æˆ‘å€‘ç³»çµ±çš„é è¨­ç™»å…¥æ©Ÿåˆ¶æ˜¯ "Cookie"
+// µù¥Uµn¤J³¹
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //§Ú­Ì¨t²Îªº¹w³]µn¤J¾÷¨î¬O "Cookie"
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; //å¦‚æœæŸå€‹é é¢éœ€è¦ç™»å…¥ï¼Œä½†ä½¿ç”¨è€…é‚„æ²’ç™»å…¥ â†’ è‡ªå‹•å°åˆ°é€™å€‹ç¶²å€
-        options.AccessDeniedPath = "/Account/AccessDenied"; // å·²ç¶“ç™»å…¥äº†ï¼Œä½†ã€Œæ¬Šé™ä¸å¤ ã€â†’ è‡ªå‹•å°åˆ°é€™å€‹ç¶²å€
-        options.ExpireTimeSpan = TimeSpan.FromHours(8); // é€™å€‹ç™»å…¥ç« ï¼ˆCookieï¼‰å¤šä¹…æœƒå¤±æ•ˆ
-        options.SlidingExpiration = true; // åªè¦ä½¿ç”¨è€…ã€ŒæŒçºŒåœ¨ä½¿ç”¨ç³»çµ±ã€Cookie å°±æœƒè‡ªå‹•å»¶é•·
+        options.LoginPath = "/Account/Login"; //¦pªG¬Y­Ó­¶­±»İ­nµn¤J¡A¦ı¨Ï¥ÎªÌÁÙ¨Sµn¤J ¡÷ ¦Û°Ê¾É¨ì³o­Óºô§}
+        options.AccessDeniedPath = "/Account/AccessDenied"; // ¤w¸gµn¤J¤F¡A¦ı¡uÅv­­¤£°÷¡v¡÷ ¦Û°Ê¾É¨ì³o­Óºô§}
+        options.ExpireTimeSpan = TimeSpan.FromHours(8); // ³o­Óµn¤J³¹¡]Cookie¡^¦h¤[·|¥¢®Ä
+        options.SlidingExpiration = true; // ¥u­n¨Ï¥ÎªÌ¡u«ùÄò¦b¨Ï¥Î¨t²Î¡vCookie ´N·|¦Û°Ê©µªø
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = async context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        success = false,
+                        errorCode = "Unauthorized"
+                    });
+                    return;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+            },
+            OnRedirectToAccessDenied = async context =>
+            {
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        success = false,
+                        errorCode = "PermissionDenied"
+                    });
+                    return;
+                }
+
+                context.Response.Redirect(context.RedirectUri);
+            }
+        };
     });
 
-// Authorization æ“´å……ï¼ˆPermission ç³»çµ±ï¼‰
+// Authorization ÂX¥R¡]Permission ¨t²Î¡^
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-// Serilog è¨­å®š
+// Serilog ³]©w
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()              // Info ä»¥ä¸Šæ‰è¨˜
-    .WriteTo.Console()                        // å¯«åˆ° console
+    .MinimumLevel.Information()              // Info ¥H¤W¤~°O
+    .WriteTo.Console()                        // ¼g¨ì console
     .WriteTo.File(
-        path: "logs/app-.log",                // logs è³‡æ–™å¤¾
-        rollingInterval: RollingInterval.Day, // æ¯å¤©ä¸€å€‹æª”
-        retainedFileCountLimit: 14             // ç•™ 14 å¤©
+        path: "logs/app-.log",                // logs ¸ê®Æ§¨
+        rollingInterval: RollingInterval.Day, // ¨C¤Ñ¤@­ÓÀÉ
+        retainedFileCountLimit: 14             // ¯d 14 ¤Ñ
     )
     .CreateLogger();
 
-// å‘Šè¨´ ASP.NET Coreï¼šILogger æ”¹ç”¨ Serilog
+// §i¶D ASP.NET Core¡GILogger §ï¥Î Serilog
 builder.Host.UseSerilog();
 
 var app = builder.Build();
@@ -87,14 +123,15 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();   // ä¸€å®šè¦åœ¨ Authorization å‰
+app.UseAuthentication();   // ¤@©w­n¦b Authorization «e
 
 app.UseAuthorization();
 
-// èµ·ç«™ä½ç½®
+// °_¯¸¦ì¸m
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}" //ç•¶ä½¿ç”¨è€…æ²’æŒ‡å®šControllerä¸”actionä¹Ÿæ²’æŒ‡å®šçš„æ™‚å€™è‡ªå‹•è·³è½‰é€™å€‹é é¢
+    pattern: "{controller=Login}/{action=Index}" //·í¨Ï¥ÎªÌ¨S«ü©wController¥Baction¤]¨S«ü©wªº®É­Ô¦Û°Ê¸õÂà³o­Ó­¶­±
 );
 
 app.Run();
+

@@ -11,10 +11,30 @@ function buildQueryString(payload) {
     return query ? `?${query}` : '';
 }
 
+async function toApiJson(response) {
+    const raw = await response.text();
+
+    if (raw) {
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return {
+                success: false,
+                errorCode: `HTTP_${response.status}`
+            };
+        }
+    }
+
+    return {
+        success: response.ok,
+        errorCode: response.ok ? undefined : `HTTP_${response.status}`
+    };
+}
+
 export async function getContentTypeLookups(payload) {
     return await fetch(`/api/content-types${buildQueryString(payload)}`, {
         method: 'GET'
-    }).then(response => response.json());
+    }).then(toApiJson);
 }
 
 export async function createContentType(payload) {
@@ -22,7 +42,7 @@ export async function createContentType(payload) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(response => response.json());
+    }).then(toApiJson);
 }
 
 export async function updateContentType(typeId, payload) {
@@ -30,11 +50,11 @@ export async function updateContentType(typeId, payload) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).then(response => response.json());
+    }).then(toApiJson);
 }
 
 export async function deleteContentType(typeId) {
     return await fetch(`/api/content-types/${typeId}`, {
         method: 'DELETE'
-    }).then(response => response.json());
+    }).then(toApiJson);
 }

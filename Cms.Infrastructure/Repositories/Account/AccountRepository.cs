@@ -1,8 +1,8 @@
-ï»¿using Cms.Contract.Common.Pagination;
+using Cms.Contract.Common.Pagination;
 using Cms.Contract.Repositories.Account.Entities;
 using Cms.Contract.Repositories.Account.Interfaces;
 using Cms.Contract.Repositories.Account.Persistence;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
@@ -146,7 +146,7 @@ namespace Cms.Infrastructure.Repositories.Account
                 ORDER BY a.Username;
             ";
 
-            // ä¸‹é¢é€™æ®µæ˜¯æ¨™æº–éŒ¯èª¤å¯«æ³•, é€™æ˜¯å°joinåšoffsetä¸æ˜¯å°account, åƒè¬ä¸èƒ½å¯«æˆä¸‹é¢é€™æ¨£, æœ‰æ©ŸæœƒæŠŠjoinçš„è³‡æ–™åˆ‡å‰²
+            // ¤U­±³o¬q¬O¼Ğ·Ç¿ù»~¼gªk, ³o¬O¹ïjoin°µoffset¤£¬O¹ïaccount, ¤d¸U¤£¯à¼g¦¨¤U­±³o¼Ë, ¦³¾÷·|§âjoinªº¸ê®Æ¤Á³Î
             // const string dataSql = @" 
             //     SELECT
             //         a.AccountId,
@@ -224,7 +224,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     Username = username,
                     PasswordHash = passwordHash
                 },
-                transaction: Tx   // ğŸ”¥ é—œéµ æœ‰äº¤æ˜“Txå°±ä¸æœƒæ˜¯null, serviceå±¤æœƒå…ˆnewèµ·ä¾†
+                transaction: Tx   // ?? ÃöÁä ¦³¥æ©öTx´N¤£·|¬Onull, service¼h·|¥ınew°_¨Ó
             );
 
             return accountId;
@@ -255,7 +255,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     RoleId = roleId,
                     DepartmentId = departmentId
                 },
-                transaction: Tx  // ğŸ”¥ ä¸€æ¨£è¦
+                transaction: Tx  // ?? ¤@¼Ë­n
             );
         }
 
@@ -312,7 +312,7 @@ namespace Cms.Infrastructure.Repositories.Account
                     Username = username,
                     Status = status
                 },
-                Tx   // â­ é—œéµï¼šä¸€å®šè¦å¸¶äº¤æ˜“
+                Tx   // ? ÃöÁä¡G¤@©w­n±a¥æ©ö
             );
 
             return accountId;
@@ -401,3 +401,4 @@ namespace Cms.Infrastructure.Repositories.Account
         }
     }
 }
+

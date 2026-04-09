@@ -28,4 +28,8 @@ VALUES
 (N'Content.View',   N'內容查閱'),
 (N'Content.Create', N'內容新增'),
 (N'Content.Edit',   N'內容編輯'),
-(N'Content.Delete', N'內容刪除');
+(N'Content.Delete', N'內容刪除'),
+(N'ContentType.View',   N'內容種類查閱'),
+(N'ContentType.Create', N'內容種類新增'),
+(N'ContentType.Edit',   N'內容種類編輯'),
+(N'ContentType.Delete', N'內容種類刪除');

@@ -54,8 +54,8 @@ namespace Cms.Contract.Repositories.Role.Interfaces
         Task DeleteRoleAsync(string roleName);
 
         /// <summary>
-        /// 刪掉帳戶所有對應角色
+        /// 刪掉角色所有對應權限
         /// </summary>
-        Task DeleteRolePermissionsAsync(Guid roleId);
+        Task DeleteRolePermissionScopeAsync(Guid roleId);
     }
 }

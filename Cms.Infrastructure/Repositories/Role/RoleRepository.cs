@@ -1,8 +1,8 @@
-﻿using Cms.Contract.Common.Pagination;
+using Cms.Contract.Common.Pagination;
 using Cms.Contract.Repositories.Role.Entities;
 using Cms.Contract.Repositories.Role.Interfaces;
 using Cms.Contract.Repositories.Role.Persistence;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
@@ -64,13 +64,13 @@ namespace Cms.Infrastructure.Repositories.Role
             ";
 
             const string dataSql = @"
-                -- 建立一張暫時存在的虛擬表:PagedRoles
-                -- 這張表「只負責決定這一頁有哪些 Role」
+                -- �إߤ@�i�Ȯɦs�b��������:PagedRoles
+                -- �o�i���u�u�t�d�M�w�o�@�������� Role�v
                 WITH PagedRoles AS (
                     SELECT RoleId
                     FROM Roles
                     ORDER BY RoleName
-                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY -- offset前一定要orderby
+                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY -- offset�e�@�w�norderby
                 )
                 SELECT
                     r.RoleId,
@@ -85,8 +85,8 @@ namespace Cms.Infrastructure.Repositories.Role
 
                     r.Status
                 FROM Roles r
-                -- 只留下剛剛分頁選中的 Role
-                -- 等於說：只處理這一頁的 Role
+                -- �u�d�U�������襤�� Role
+                -- ���󻡡G�u�B�z�o�@���� Role
                 JOIN PagedRoles pr ON r.RoleId = pr.RoleId
                 LEFT JOIN RolePermissionScope rp ON r.RoleId = rp.RoleId
                 LEFT JOIN Permissions p ON rp.PermissionId = p.PermissionId
@@ -258,7 +258,7 @@ namespace Cms.Infrastructure.Repositories.Role
             });
         }
 
-        public async Task DeleteRolePermissionsAsync(Guid roleId)
+        public async Task DeleteRolePermissionScopeAsync(Guid roleId)
         {
             const string sql = @"
                 DELETE FROM RolePermissionScope
@@ -274,3 +274,4 @@ namespace Cms.Infrastructure.Repositories.Role
         
     }
 }
+

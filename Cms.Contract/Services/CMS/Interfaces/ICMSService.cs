@@ -16,10 +16,10 @@ namespace Cms.Contract.Services.CMS.Interfaces
 
         Task<List<GetContentFieldsResponseDto>> ListContentFieldsAsync(Guid typeId, Guid accountId);
 
-        Task<CreateContentTypeResponseDto> CreateContentTypeAsync(CreateContentTypeRequestDto req);
+        Task<CreateContentTypeResponseDto> CreateContentTypeAsync(CreateContentTypeRequestDto req, Guid accountId);
 
-        Task<UpdateContentTypeResponseDto> UpdateContentTypeAsync(UpdateContentTypeRequestDto req);
+        Task<UpdateContentTypeResponseDto> UpdateContentTypeAsync(UpdateContentTypeRequestDto req, Guid accountId);
 
-        Task<DeleteContentTypeResponseDto> DeleteContentTypeAsync(DeleteContentTypeRequestDto req);
+        Task<DeleteContentTypeResponseDto> DeleteContentTypeAsync(DeleteContentTypeRequestDto req, Guid accountId);
     }
 }

@@ -1,28 +1,29 @@
-ï»¿using System.Data;
+using System.Data;
 
-namespace Cms.Contract.Services.UnitOfWork.Interfaces
+namespace Cms.Contract.Repositories.UnitOfWork.Interfaces
 {
     public interface IUnitOfWork
     {
         /// <summary>
-        /// ç›®å‰ä½œç”¨ä¸­çš„ Transactionï¼ˆæ²’æœ‰äº¤æ˜“æ™‚ç‚º nullï¼‰
-        /// Repository åªè®€é€™å€‹ï¼Œä¸è² è²¬å»ºç«‹æˆ–é‡‹æ”¾
+        /// ¥Ø«e§@¥Î¤¤ªº Transaction¡]¨S¦³¥æ©ö®É¬° null¡^
+        /// Repository ¥uÅª³o­Ó¡A¤£­t³d«Ø¥ß©ÎÄÀ©ñ
         /// </summary>
         IDbTransaction? Transaction { get; }
 
         /// <summary>
-        /// é–‹å§‹ä¸€å€‹äº¤æ˜“
+        /// ¶}©l¤@­Ó¥æ©ö
         /// </summary>
         void BeginTransaction();
 
         /// <summary>
-        /// æäº¤äº¤æ˜“ï¼ˆå…§éƒ¨ä¸€å®šæœƒ Disposeï¼‰
+        /// ´£¥æ¥æ©ö¡]¤º³¡¤@©w·| Dispose¡^
         /// </summary>
         void Commit();
 
         /// <summary>
-        /// å›æ»¾äº¤æ˜“ï¼ˆå…§éƒ¨ä¸€å®šæœƒ Disposeï¼‰
+        /// ¦^ºu¥æ©ö¡]¤º³¡¤@©w·| Dispose¡^
         /// </summary>
         void Rollback();
     }
 }
+

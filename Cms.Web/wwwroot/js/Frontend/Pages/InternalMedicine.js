@@ -130,6 +130,7 @@ export const InternalMedicine = {
                 <button
                     type="button"
                     class="btn btn-primary"
+                    :disabled="!departmentId"
                     @click="openCreateModal"
                 >
                     新增表單種類

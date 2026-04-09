@@ -8,6 +8,7 @@ namespace Cms.Contract.Services.CMS.Dtos
     public enum DeleteContentTypeResult
     {
         Success,
+        PermissionDenied,
         TypeNotFound,
         ContentTypeInUse,
         FieldInUse

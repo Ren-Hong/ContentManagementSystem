@@ -1,4 +1,4 @@
-ï»¿using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using System.Data;
 
 namespace Cms.Infrastructure.Repositories.Base
@@ -10,13 +10,14 @@ namespace Cms.Infrastructure.Repositories.Base
 
         protected BaseRepository(
             IDbConnection db,
-            IUnitOfWork unitOfWork
+            IUnitOfWork unitOfWork // Scoped ¸ò Service ¤@¼Ëªº¹ê¨Ò
         )
         {
             _db = db;
             _unitOfWork = unitOfWork;
         }
 
-        protected IDbTransaction? Tx => _unitOfWork.Transaction; // å¦‚æžœServiceæœ‰è·‘BeginTransaction é€™å€‹å±¬æ€§å°±æœƒè¢«é™„å€¼
+        protected IDbTransaction? Tx => _unitOfWork.Transaction; // ¦pªGService¦³¶]BeginTransaction ³o­ÓÄÝ©Ê´N·|³Qªþ­È
     }
 }
+

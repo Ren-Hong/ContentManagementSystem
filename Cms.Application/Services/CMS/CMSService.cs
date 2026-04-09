@@ -3,13 +3,17 @@ using Cms.Contract.Repositories.ContentType.Interfaces;
 using Cms.Contract.Services.CMS.Dtos;
 using Cms.Contract.Services.CMS.Interfaces;
 using Cms.Contract.Services.RBAC.Interfaces;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 
 namespace Cms.Application.Services.CMS
 {
     public class CMSService : ICMSService
     {
         private const string DefaultContentStatus = "Draft";
+        private const string ContentTypeViewPermissionCode = "ContentType.View";
+        private const string ContentTypeCreatePermissionCode = "ContentType.Create";
+        private const string ContentTypeEditPermissionCode = "ContentType.Edit";
+        private const string ContentTypeDeletePermissionCode = "ContentType.Delete";
         private const string ContentViewPermissionCode = "Content.View";
         private const string ContentCreatePermissionCode = "Content.Create";
         private const string ContentEditPermissionCode = "Content.Edit";
@@ -375,7 +379,7 @@ namespace Cms.Application.Services.CMS
 
             var canAccessDepartment = await _rbacService.CanAccessDepartmentAsync(
                 accountId,
-                ContentViewPermissionCode,
+                ContentTypeViewPermissionCode,
                 req.DepartmentId
             );
 
@@ -410,7 +414,7 @@ namespace Cms.Application.Services.CMS
 
             var canAccessDepartment = await _rbacService.CanAccessDepartmentAsync(
                 accountId,
-                ContentViewPermissionCode,
+                ContentTypeViewPermissionCode,
                 departmentId.Value
             );
 
@@ -433,13 +437,27 @@ namespace Cms.Application.Services.CMS
                 .ToList();
         }
 
-        public async Task<CreateContentTypeResponseDto> CreateContentTypeAsync(CreateContentTypeRequestDto req)
+        public async Task<CreateContentTypeResponseDto> CreateContentTypeAsync(CreateContentTypeRequestDto req, Guid accountId)
         {
             if (req.DepartmentId == Guid.Empty)
             {
                 return new CreateContentTypeResponseDto
                 {
                     Result = CreateContentTypeResult.DepartmentRequired
+                };
+            }
+
+            var canCreateInDepartment = await _rbacService.CanAccessDepartmentAsync(
+                accountId,
+                ContentTypeCreatePermissionCode,
+                req.DepartmentId
+            );
+
+            if (!canCreateInDepartment)
+            {
+                return new CreateContentTypeResponseDto
+                {
+                    Result = CreateContentTypeResult.PermissionDenied
                 };
             }
 
@@ -555,7 +573,7 @@ namespace Cms.Application.Services.CMS
             }
         }
 
-        public async Task<UpdateContentTypeResponseDto> UpdateContentTypeAsync(UpdateContentTypeRequestDto req)
+        public async Task<UpdateContentTypeResponseDto> UpdateContentTypeAsync(UpdateContentTypeRequestDto req, Guid accountId)
         {
             if (req.TypeId == Guid.Empty || !await _contentTypeRepository.TypeExistsAsync(req.TypeId))
             {
@@ -580,6 +598,20 @@ namespace Cms.Application.Services.CMS
                 return new UpdateContentTypeResponseDto
                 {
                     Result = UpdateContentTypeResult.TypeNotFound
+                };
+            }
+
+            var canEditInDepartment = await _rbacService.CanAccessDepartmentAsync(
+                accountId,
+                ContentTypeEditPermissionCode,
+                departmentId.Value
+            );
+
+            if (!canEditInDepartment)
+            {
+                return new UpdateContentTypeResponseDto
+                {
+                    Result = UpdateContentTypeResult.PermissionDenied
                 };
             }
 
@@ -754,13 +786,28 @@ namespace Cms.Application.Services.CMS
             }
         }
 
-        public async Task<DeleteContentTypeResponseDto> DeleteContentTypeAsync(DeleteContentTypeRequestDto req)
+        public async Task<DeleteContentTypeResponseDto> DeleteContentTypeAsync(DeleteContentTypeRequestDto req, Guid accountId)
         {
             if (req.TypeId == Guid.Empty || !await _contentTypeRepository.TypeExistsAsync(req.TypeId))
             {
                 return new DeleteContentTypeResponseDto
                 {
                     Result = DeleteContentTypeResult.TypeNotFound
+                };
+            }
+
+            var departmentId = await _contentTypeRepository.GetDepartmentIdByTypeIdAsync(req.TypeId);
+            var canDeleteInDepartment = departmentId.HasValue && await _rbacService.CanAccessDepartmentAsync(
+                accountId,
+                ContentTypeDeletePermissionCode,
+                departmentId.Value
+            );
+
+            if (!canDeleteInDepartment)
+            {
+                return new DeleteContentTypeResponseDto
+                {
+                    Result = DeleteContentTypeResult.PermissionDenied
                 };
             }
 

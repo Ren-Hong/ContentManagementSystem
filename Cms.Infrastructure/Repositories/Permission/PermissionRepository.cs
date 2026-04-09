@@ -1,6 +1,6 @@
-﻿using Cms.Contract.Repositories.Permission.Entities;
+using Cms.Contract.Repositories.Permission.Entities;
 using Cms.Contract.Repositories.Permission.Interfaces;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
 using Dapper;
 using System.Data;
@@ -51,3 +51,4 @@ namespace Cms.Infrastructure.Repositories.Permission
         }
     }
 }
+

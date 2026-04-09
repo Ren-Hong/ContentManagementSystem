@@ -8,6 +8,7 @@ namespace Cms.Contract.Services.CMS.Dtos
     public enum UpdateContentTypeResult
     {
         Success,
+        PermissionDenied,
         TypeNotFound,
         TypeNameRequired,
         TypeNameDuplicated,

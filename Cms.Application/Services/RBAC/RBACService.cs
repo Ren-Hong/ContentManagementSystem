@@ -7,7 +7,7 @@ using Cms.Contract.Repositories.Scope.Interfaces;
 using Cms.Contract.Repositories.Department.Interfaces;
 using Cms.Contract.Services.RBAC.Dtos;
 using Cms.Contract.Services.RBAC.Interfaces;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 
 
 namespace Cms.Application.Services.RBAC
@@ -42,7 +42,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
         {
-            // ±b¸¹¨Sµ¹
+            // ï¿½bï¿½ï¿½ï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Username))
             {
                 return new LoginResponseDto
@@ -51,7 +51,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ±K½X¨Sµ¹
+            // ï¿½Kï¿½Xï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Password))
             {
                 return new LoginResponseDto
@@ -60,17 +60,17 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¨ú±o±b¸¹¨¤¦âÅv­­
+            // ï¿½ï¿½ï¿½oï¿½bï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ï¿½
             var rows = (await _accountRepository.GetAccountAuthByUsernameAsync(dto.Username)).ToList();
 
-            // §ä¤£¨ì±b¸¹
+            // ï¿½ä¤£ï¿½ï¿½bï¿½ï¿½
             if (!rows.Any())
                 return new LoginResponseDto
                 {
                     Result = LoginResult.AccountNotFound
                 };
 
-            // Entity Âà Dto
+            // Entity ï¿½ï¿½ Dto
             var auth = new GetAccountAuthResponseDto 
             {
                 
@@ -79,8 +79,8 @@ namespace Cms.Application.Services.RBAC
                 PasswordHash = rows[0].PasswordHash,
 
                 RoleCodes = rows
-                    .Select(x => x.RoleCode)                            // ¥u®³ RoleCodes
-                    .Where(code => !string.IsNullOrWhiteSpace(code))    // ¥h Null »P ªÅ¦r¦ê, IEnumerable<string?>
+                    .Select(x => x.RoleCode)                            // ï¿½uï¿½ï¿½ RoleCodes
+                    .Where(code => !string.IsNullOrWhiteSpace(code))    // ï¿½h Null ï¿½P ï¿½Å¦rï¿½ï¿½, IEnumerable<string?>
                     .Select(code => code!)                              // IEnumerable<string?> -> IEnumerable<string>
                     .Distinct()
                     .ToList(),
@@ -93,14 +93,14 @@ namespace Cms.Application.Services.RBAC
                     .ToList(),
             };
 
-            // ÅçÃÒ±K½X
+            // ï¿½ï¿½ï¿½Ò±Kï¿½X
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, auth.PasswordHash))
                 return new LoginResponseDto
                 {
                     Result = LoginResult.InvalidPassword
                 };
 
-            // §ó·s¤W¤@¦¸µn¤J®É¶¡
+            // ï¿½ï¿½sï¿½Wï¿½@ï¿½ï¿½ï¿½nï¿½Jï¿½É¶ï¿½
             await _accountRepository.UpdateLastLoginAtAsync(auth.AccountId, DateTime.UtcNow);
 
             return new LoginResponseDto
@@ -316,7 +316,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<CreateRoleResponseDto> CreateRoleAsync(CreateRoleRequestDto dto)
         {
-            // ¨¤¦â¦WºÙ¨Sµ¹
+            // ï¿½ï¿½ï¿½ï¿½Wï¿½Ù¨Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.RoleName))
             {
                 return new CreateRoleResponseDto
@@ -325,7 +325,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¨¤¦â¥N½X¨Sµ¹
+            // ï¿½ï¿½ï¿½ï¿½Nï¿½Xï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.RoleCode))
             {
                 return new CreateRoleResponseDto
@@ -334,7 +334,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // PermissionScopes ¨Sµ¹
+            // PermissionScopes ï¿½Sï¿½ï¿½
             if (dto.PermissionScopes == null || !dto.PermissionScopes.Any())
             {
                 return new CreateRoleResponseDto
@@ -357,7 +357,7 @@ namespace Cms.Application.Services.RBAC
                 .Distinct()
                 .ToList();
 
-            // Permission ¬O§_¦s¦b
+            // Permission ï¿½Oï¿½_ï¿½sï¿½b
             if (!await _permissionRepository.AllPermissionsExistAsync(permissionIds))
             {
                 return new CreateRoleResponseDto
@@ -366,7 +366,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // Scope ¬O§_¦s¦b
+            // Scope ï¿½Oï¿½_ï¿½sï¿½b
             if (!await _scopeRepository.AllScopesExistAsync(scopeIds))
             {
                 return new CreateRoleResponseDto
@@ -375,7 +375,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¨¤¦â¦WºÙ¬O§_­«½Æ
+            // ï¿½ï¿½ï¿½ï¿½Wï¿½Ù¬Oï¿½_ï¿½ï¿½ï¿½ï¿½
             if (await _roleRepository.RoleNameExistsAsync(dto.RoleName))
             {
                 return new CreateRoleResponseDto
@@ -385,19 +385,19 @@ namespace Cms.Application.Services.RBAC
             }
 
 
-            // ¥]¥æ©ö
+            // ï¿½]ï¿½ï¿½ï¿½
             _unitOfWork.BeginTransaction();
 
             try
             {
-                // «Ø¥ß Role
+                // ï¿½Ø¥ï¿½ Role
                 var roleId = await _roleRepository.CreateRoleAsync(
                     dto.RoleName,
                     dto.RoleCode
                 );
 
-                // «Ø¥ß RolePermissionScope
-                foreach (var item in dto.PermissionScopes)
+                // ï¿½Ø¥ï¿½ RolePermissionScope
+                foreach (var item in normalizedScopes)
                 {
                     await _roleRepository.CreateRolePermissionScopeAsync(
                         roleId,
@@ -422,7 +422,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<UpdateRoleResponseDto> UpdateRoleAsync(UpdateRoleRequestDto dto)
         {
-            // ¨¤¦â¦WºÙ¨Sµ¹
+            // ï¿½ï¿½ï¿½ï¿½Wï¿½Ù¨Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.RoleName))
             {
                 return new UpdateRoleResponseDto
@@ -431,7 +431,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // PermissionScopes ¨Sµ¹
+            // PermissionScopes ï¿½Sï¿½ï¿½
             if (dto.PermissionScopes == null || !dto.PermissionScopes.Any())
             {
                 return new UpdateRoleResponseDto
@@ -454,7 +454,7 @@ namespace Cms.Application.Services.RBAC
                 .Distinct()
                 .ToList();
 
-            // Permission ¬O§_¦s¦b
+            // Permission ï¿½Oï¿½_ï¿½sï¿½b
             if (!await _permissionRepository.AllPermissionsExistAsync(permissionIds))
             {
                 return new UpdateRoleResponseDto
@@ -463,7 +463,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // Scope ¬O§_¦s¦b
+            // Scope ï¿½Oï¿½_ï¿½sï¿½b
             if (!await _scopeRepository.AllScopesExistAsync(scopeIds))
             {
                 return new UpdateRoleResponseDto
@@ -472,7 +472,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¨¤¦â¦WºÙ¬O§_­«½Æ
+            // ï¿½ï¿½ï¿½ï¿½Wï¿½Ù¬Oï¿½_ï¿½ï¿½ï¿½ï¿½
             if (!await _roleRepository.RoleNameExistsAsync(dto.RoleName))
             {
                 return new UpdateRoleResponseDto
@@ -481,7 +481,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¦³¨S¦³³oºØª¬ºA
+            // ï¿½ï¿½ï¿½Sï¿½ï¿½ï¿½oï¿½Øªï¿½ï¿½A
             if (!Enum.IsDefined(dto.Status))
             {
                 return new UpdateRoleResponseDto
@@ -490,19 +490,20 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¥]¥æ©ö
+            // ï¿½]ï¿½ï¿½ï¿½
             _unitOfWork.BeginTransaction();
 
             try
             {
-                // §ó·s±b¤áª¬ºA
+                // ï¿½ï¿½sï¿½ï¿½ï¿½âª¬ï¿½A
                 var roleId = await _roleRepository.UpdateRoleStatusAsync(
                     dto.RoleName,
                     dto.Status
                 );
 
-                // «Ø¥ß RolePermissionScope
-                foreach (var item in dto.PermissionScopes)
+                // ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½Aï¿½Aï¿½Ø¥ß·sï¿½ï¿½ RolePermissionScope
+                await _roleRepository.DeleteRolePermissionScopeAsync(roleId);
+                foreach (var item in normalizedScopes)
                 {
                     await _roleRepository.CreateRolePermissionScopeAsync(
                         roleId,
@@ -527,7 +528,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<DeleteRoleResponseDto> DeleteRoleAsync(DeleteRoleRequestDto dto)
         {
-            // ¨¤¦â¦WºÙ¨Sµ¹
+            // ï¿½ï¿½ï¿½ï¿½Wï¿½Ù¨Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.RoleName))
             {
                 return new DeleteRoleResponseDto
@@ -536,7 +537,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¦³¨S¦³³o¨¤¦â¦WºÙ
+            // ï¿½ï¿½ï¿½Sï¿½ï¿½ï¿½oï¿½ï¿½ï¿½ï¿½Wï¿½ï¿½
             if (!await _roleRepository.RoleNameExistsAsync(dto.RoleName))
             {
                 return new DeleteRoleResponseDto
@@ -554,7 +555,7 @@ namespace Cms.Application.Services.RBAC
         }
         public async Task<CreateAccountResponseDto> CreateAccountAsync(CreateAccountRequestDto dto)
         {
-            // ±b¸¹¨Sµ¹
+            // ï¿½bï¿½ï¿½ï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Username))
             {
                 return new CreateAccountResponseDto
@@ -563,7 +564,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ±K½X¨Sµ¹
+            // ï¿½Kï¿½Xï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Password))
             {
                 return new CreateAccountResponseDto
@@ -572,7 +573,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // RoleAssignments ¨Sµ¹
+            // RoleAssignments ï¿½Sï¿½ï¿½
             if (dto.RoleAssignments == null || !dto.RoleAssignments.Any())
             {
                 return new CreateAccountResponseDto
@@ -581,7 +582,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ÀË¬d Role ¬O§_¦s¦b
+            // ï¿½Ë¬d Role ï¿½Oï¿½_ï¿½sï¿½b
             var roleIds = dto.RoleAssignments
                 .Select(x => x.RoleId)
                 .Distinct()
@@ -595,9 +596,9 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ÀË¬d Department ¬O§_¦s¦b
+            // ï¿½Ë¬d Department ï¿½Oï¿½_ï¿½sï¿½b
             var departmentIds = dto.RoleAssignments
-                .SelectMany(x => x.DepartmentIds) // ¦]¬°¤@­Ó RoleAssignment ¥i¯à¹ï¦h­Ó Department, ©Ò¥H­n SelectMany ®i¥­
+                .SelectMany(x => x.DepartmentIds) // ï¿½]ï¿½ï¿½ï¿½@ï¿½ï¿½ RoleAssignment ï¿½iï¿½ï¿½ï¿½hï¿½ï¿½ Department, ï¿½Ò¥Hï¿½n SelectMany ï¿½iï¿½ï¿½
                 .Distinct()
                 .ToList();
 
@@ -609,7 +610,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ±b¸¹¬O§_­«½Æ
+            // ï¿½bï¿½ï¿½ï¿½Oï¿½_ï¿½ï¿½ï¿½ï¿½
             if (await _accountRepository.AccountExistsAsync(dto.Username))
             {
                 return new CreateAccountResponseDto
@@ -618,24 +619,24 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ÅxÆQ¥[±K
+            // ï¿½xï¿½Qï¿½[ï¿½K
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
 
-            // ¥]¥æ©ö
+            // ï¿½]ï¿½ï¿½ï¿½
             _unitOfWork.BeginTransaction();
 
             try
             {
-                // ¥ý«Ø±b¤á
+                // ï¿½ï¿½ï¿½Ø±bï¿½ï¿½
                 var accountId = await _accountRepository.CreateAccountAsync(
                     dto.Username,
                     passwordHash
                 );
 
-                // «Ø¦hµ§ AccountRoleAssignment
+                // ï¿½Ø¦hï¿½ï¿½ AccountRoleAssignment
                 var rows = dto.RoleAssignments
-                    .SelectMany(r => r.DepartmentIds.Select(d => new //¤ßªk¡GSelectMany(RoleId) + Select(DepartmentId) ´N¬OÂù¼hforeach
+                    .SelectMany(r => r.DepartmentIds.Select(d => new //ï¿½ßªkï¿½GSelectMany(RoleId) + Select(DepartmentId) ï¿½Nï¿½Oï¿½ï¿½ï¿½hforeach
                     {
                         AccountId = accountId,
                         RoleId = r.RoleId,
@@ -661,7 +662,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<UpdateAccountResponseDto> UpdateAccountAsync(UpdateAccountRequestDto dto)
         {
-            // ±b¸¹¨Sµ¹
+            // ï¿½bï¿½ï¿½ï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Username))
             {
                 return new UpdateAccountResponseDto
@@ -670,7 +671,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // RoleAssignments ¨Sµ¹
+            // RoleAssignments ï¿½Sï¿½ï¿½
             if (dto.RoleAssignments == null || !dto.RoleAssignments.Any())
             {
                 return new UpdateAccountResponseDto
@@ -679,7 +680,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ÀË¬d Role ¬O§_¦s¦b
+            // ï¿½Ë¬d Role ï¿½Oï¿½_ï¿½sï¿½b
             var roleIds = dto.RoleAssignments
                 .Select(x => x.RoleId)
                 .Distinct()
@@ -693,7 +694,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ÀË¬d Department ¬O§_¦s¦b
+            // ï¿½Ë¬d Department ï¿½Oï¿½_ï¿½sï¿½b
             var departmentIds = dto.RoleAssignments
                 .SelectMany(x => x.DepartmentIds)
                 .Distinct()
@@ -707,7 +708,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¦³¨S¦³³o±b¸¹
+            // ï¿½ï¿½ï¿½Sï¿½ï¿½ï¿½oï¿½bï¿½ï¿½
             if (!await _accountRepository.AccountExistsAsync(dto.Username))
             {
                 return new UpdateAccountResponseDto
@@ -716,7 +717,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¦³¨S¦³³oºØª¬ºA
+            // ï¿½ï¿½ï¿½Sï¿½ï¿½ï¿½oï¿½Øªï¿½ï¿½A
             if (!Enum.IsDefined(dto.Status))
             {
                 return new UpdateAccountResponseDto
@@ -725,21 +726,21 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¥]¥æ©ö
+            // ï¿½]ï¿½ï¿½ï¿½
             _unitOfWork.BeginTransaction();
 
             try
             {
-                // §ó·s±b¤áª¬ºA
+                // ï¿½ï¿½sï¿½bï¿½áª¬ï¿½A
                 var accountId = await _accountRepository.UpdateAccountStatusAsync(
                     dto.Username,
                     dto.Status
                 );
 
-                // §ó·s±b¤á¨¤¦â¡]¥ý²M±¼¦A¥[¡A³Ì°®²b¡^
+                // ï¿½ï¿½sï¿½bï¿½á¨¤ï¿½ï¿½]ï¿½ï¿½ï¿½Mï¿½ï¿½ï¿½Aï¿½[ï¿½Aï¿½Ì°ï¿½ï¿½bï¿½^
                 await _accountRepository.DeleteAccountRoleAssignmentsAsync(accountId);
 
-                // «Ø¦hµ§ AccountRoleAssignment
+                // ï¿½Ø¦hï¿½ï¿½ AccountRoleAssignment
                 var rows = dto.RoleAssignments
                     .SelectMany(r => r.DepartmentIds.Select(d => new
                     {
@@ -767,7 +768,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<ResetPasswordResponseDto> ResetPasswordAsync(ResetPasswordRequestDto dto)
         {
-            // ±b¸¹¨Sµ¹
+            // ï¿½bï¿½ï¿½ï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Username))
             {
                 return new ResetPasswordResponseDto
@@ -776,7 +777,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ±K½X¨Sµ¹
+            // ï¿½Kï¿½Xï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Password))
             {
                 return new ResetPasswordResponseDto
@@ -785,7 +786,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ±b¸¹¤£¦s¦b
+            // ï¿½bï¿½ï¿½ï¿½ï¿½ï¿½sï¿½b
             if (!await _accountRepository.AccountExistsAsync(dto.Username))
             {
                 return new ResetPasswordResponseDto
@@ -794,13 +795,13 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¥[ÆQ¼»±K
+            // ï¿½[ï¿½Qï¿½ï¿½ï¿½K
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-            // §ó·s±K½X
+            // ï¿½ï¿½sï¿½Kï¿½X
             await _accountRepository.UpdatePasswordAsync(dto.Username, passwordHash);
 
-            // §ó·s¤W¦¸§ó·s®É¶¡
+            // ï¿½ï¿½sï¿½Wï¿½ï¿½ï¿½ï¿½sï¿½É¶ï¿½
             await _accountRepository.UpdateUpdatedAtAsync(dto.Username, DateTime.Now);
 
             return new ResetPasswordResponseDto
@@ -811,7 +812,7 @@ namespace Cms.Application.Services.RBAC
 
         public async Task<DeleteAccountResponseDto> DeleteAccountAsync(DeleteAccountRequestDto dto)
         {
-            // ±b¸¹¨Sµ¹
+            // ï¿½bï¿½ï¿½ï¿½Sï¿½ï¿½
             if (string.IsNullOrWhiteSpace(dto.Username))
             {
                 return new DeleteAccountResponseDto
@@ -820,7 +821,7 @@ namespace Cms.Application.Services.RBAC
                 };
             }
 
-            // ¦³¨S¦³³o±b¸¹
+            // ï¿½ï¿½ï¿½Sï¿½ï¿½ï¿½oï¿½bï¿½ï¿½
             if (!await _accountRepository.AccountExistsAsync(dto.Username))
             {
                 return new DeleteAccountResponseDto
@@ -853,6 +854,7 @@ namespace Cms.Application.Services.RBAC
         }
     }
 }
+
 
 
 

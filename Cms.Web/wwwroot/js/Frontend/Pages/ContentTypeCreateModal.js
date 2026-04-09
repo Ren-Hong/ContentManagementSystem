@@ -82,6 +82,11 @@ export const ContentTypeCreateModal = {
         },
 
         async submit() {
+            if (!this.departmentId) {
+                alert('請先選擇科別後再建立表單種類');
+                return;
+            }
+
             if (!this.form.typeName.trim()) {
                 alert('請輸入表單種類名稱');
                 return;

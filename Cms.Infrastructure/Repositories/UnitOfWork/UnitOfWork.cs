@@ -1,51 +1,54 @@
-﻿using Cms.Contract.Services.UnitOfWork.Interfaces;
-
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using System.Data;
 
-public class UnitOfWork : IUnitOfWork
+namespace Cms.Infrastructure.Repositories.UnitOfWork
 {
-    private readonly IDbConnection _connection;
-
-    public IDbTransaction? Transaction { get; private set; }
-
-    public UnitOfWork(IDbConnection connection)
+    public class UnitOfWork : IUnitOfWork
     {
-        _connection = connection;
-    }
+        private readonly IDbConnection _connection;
 
-    public void BeginTransaction()
-    {
-        if (_connection.State != ConnectionState.Open)
+        public IDbTransaction? Transaction { get; private set; }
+
+        public UnitOfWork(IDbConnection connection)
         {
-            _connection.Open();
+            _connection = connection;
         }
 
-        Transaction = _connection.BeginTransaction(); // 這段會給 Tx 交易物建
-    }
+        public void BeginTransaction()
+        {
+            if (_connection.State != ConnectionState.Open)
+            {
+                _connection.Open();
+            }
 
-    public void Commit()
-    {
-        try
-        {
-            Transaction?.Commit();
+            Transaction = _connection.BeginTransaction(); // ?�段?�給 Tx 交�??�建
         }
-        finally
-        {
-            Transaction?.Dispose();
-            Transaction = null;
-        }
-    }
 
-    public void Rollback()
-    {
-        try
+        public void Commit()
         {
-            Transaction?.Rollback();
+            try
+            {
+                Transaction?.Commit();
+            }
+            finally
+            {
+                Transaction?.Dispose();
+                Transaction = null;
+            }
         }
-        finally
+
+        public void Rollback()
         {
-            Transaction?.Dispose();
-            Transaction = null;
+            try
+            {
+                Transaction?.Rollback();
+            }
+            finally
+            {
+                Transaction?.Dispose();
+                Transaction = null;
+            }
         }
     }
 }
+

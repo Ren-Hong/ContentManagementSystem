@@ -13,6 +13,7 @@ namespace Cms.Contract.Services.CMS.Dtos
     {
         Success,
         DepartmentRequired,
+        PermissionDenied,
         TypeNameRequired,
         TypeNameDuplicated,
         FieldRequired,

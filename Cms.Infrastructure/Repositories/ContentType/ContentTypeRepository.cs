@@ -2,7 +2,7 @@ using System.Data;
 using Dapper;
 using Cms.Contract.Repositories.ContentType.Interfaces;
 using Cms.Infrastructure.Repositories.Base;
-using Cms.Contract.Services.UnitOfWork.Interfaces;
+using Cms.Contract.Repositories.UnitOfWork.Interfaces;
 using Cms.Contract.Repositories.ContentType.Entities;
 
 namespace Cms.Infrastructure.Repositories.ContentType
@@ -383,3 +383,4 @@ namespace Cms.Infrastructure.Repositories.ContentType
         }
     }
 }
+
